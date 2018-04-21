@@ -12,5 +12,7 @@
         <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="hibernate.show_sql">true</property>
         <mapping class="com.vikas.eventplanner.pojo.User"/>
+        <mapping class="com.vikas.eventplanner.pojo.Event"/>
+        <mapping class="com.vikas.eventplanner.pojo.Invite"/>
     </session-factory>
 </hibernate-configuration>

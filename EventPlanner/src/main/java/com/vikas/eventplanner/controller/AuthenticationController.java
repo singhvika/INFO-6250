@@ -103,20 +103,27 @@ public class AuthenticationController {
 			return new ModelAndView("register");
 
 			}
+		
+		
+			user.setPwdHash(request.getParameter("pwd"));
+			if (userDao.saveUser(user))
+			{
+				System.out.println("SUCCSS REGISTER");
+				return new ModelAndView("redirect:/");
+			}
+			
+		
+			ModelAndView mv = new ModelAndView("register");
+			mv.addObject("registerError","Duplicates");
+			return mv;
+		
 			
 		
 
 	//	String pwdHash = BCrypt.hashpw(request.getParameter("pwd"), BCrypt.gensalt());
-		user.setPwdHash(request.getParameter("pwd"));
-		if (userDao.saveUser(user))
-		{
-			System.out.println("SUCCSS REGISTER");
-			return new ModelAndView("redirect:/");
-		}
 		
-		ModelAndView mv = new ModelAndView("register");
-		mv.addObject("registerError","Duplicates");
-		return mv;
+		
+
 		
 	}
 	

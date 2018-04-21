@@ -9,23 +9,13 @@ import org.hibernate.criterion.Restrictions;
 
 import com.vikas.eventplanner.pojo.User;
 
-public class UserDAO {
+public class UserDAO extends DAO {
 
-	
-
-	
 	public UserDAO() {
-		
+
 		// TODO Auto-generated constructor stub
 	}
 
-	public Session getSession() {
-		Configuration cfg = new Configuration().configure("hibernate.cfg.xml");;
-		SessionFactory sf = cfg.buildSessionFactory();
-		System.out.println("gettin session");
-		return sf.openSession();
-
-	}
 
 	public Boolean saveUser(User user) {
 		Session session = null;
@@ -41,6 +31,30 @@ public class UserDAO {
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			if (tx != null)
+				tx.rollback();
+			return false;
+		} finally {
+			if (session != null)
+				session.close();
+		}
+
+	}
+
+	public Boolean mergeUser(User user) {
+		Session session = null;
+		Transaction tx = null;
+
+		try {
+			session = getSession();
+			tx = session.beginTransaction();
+			session.merge(user);
+			System.out.println("able to save user");
+			tx.commit();
+			return true;
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
 			tx.rollback();
 			return false;
 		} finally {
@@ -50,17 +64,17 @@ public class UserDAO {
 
 	}
 
-	public User getUserByEmail(User user) {
-		System.out.println("getting user by email: " +user.getEmail());
+	public User getUserByUserObjectWithEmail(User user) {
+		System.out.println("getting user by user object email: " + user.getEmail());
 		Session session = null;
 		Transaction tx = null;
 		try {
 			session = getSession();
-			System.out.println("Session: "+session);
+			System.out.println("Session: " + session);
 			Criteria cr = session.createCriteria(User.class);
 			cr.add(Restrictions.like("email", "%" + user.getEmail() + "%"));
 			User foundUser = (User) cr.uniqueResult();
-			System.out.println("foundUser: "+foundUser);
+			System.out.println("foundUser: " + foundUser);
 			return foundUser;
 
 		} catch (Exception ex) {
@@ -72,5 +86,29 @@ public class UserDAO {
 				session.close();
 		}
 	}
+
+	public User getUserByEmail(String user) {
+		Session session = null;
+		Transaction tx = null;
+		try {
+			session = getSession();
+			System.out.println("searching for user by email: "+user);
+			Criteria cr = session.createCriteria(User.class);
+			cr.add(Restrictions.like("email", "%" + user + "%"));
+			User foundUser = (User) cr.uniqueResult();
+			System.out.println("foundUser: " + foundUser);
+			return foundUser;
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			if(tx!=null)
+			tx.rollback();
+			return null;
+		} finally {
+			if (session != null)
+				session.close();
+		}
+	}
+
 
 }

@@ -23,7 +23,7 @@ public class AuthenticationService {
 	public Boolean authenticate(User incomingUser) {
 		
 
-		User user = new UserDAO().getUserByEmail(incomingUser);
+		User user = new UserDAO().getUserByUserObjectWithEmail(incomingUser);
 		System.out.println("FOUND USER in authenticate:" +user);
 		if (user == null) {
 			return false;

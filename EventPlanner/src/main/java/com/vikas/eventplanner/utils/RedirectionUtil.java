@@ -11,7 +11,7 @@ public class RedirectionUtil {
 	
 	public static ModelAndView redirectToLogin(HttpServletRequest request, HttpServletResponse response)
 	{
-		return new ModelAndView("redirect:/login");
+		return new ModelAndView("redirect:/login.htm");
 
 	}
 
