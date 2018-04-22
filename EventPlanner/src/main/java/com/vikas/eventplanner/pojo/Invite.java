@@ -29,6 +29,8 @@ public class Invite {
 	@Column(name = "inviteStatus")
 	Boolean inviteStatus = true;
 
+	@Column(name="inviteId")
+	String uniqueId;
 	
 	@NotNull
 	@OneToOne
@@ -42,6 +44,43 @@ public class Invite {
 	long id;
 
 	int ttl = 86400;
+
+	
+	Boolean active = true;
+	
+	
+	
+	public Boolean getActive() {
+		return active;
+	}
+
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	public String getUniqueId() {
+		return uniqueId;
+	}
+
+	public void setUniqueId(String uniqueId) {
+		this.uniqueId = uniqueId;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public int getTtl() {
+		return ttl;
+	}
+
+	public void setTtl(int ttl) {
+		this.ttl = ttl;
+	}
 
 	public Date getCreatedDate() {
 		return createdDate;

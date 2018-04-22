@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -41,7 +43,7 @@ public class DashboardController {
 
 	@Autowired
 	EventDAO eventDao;
-	
+
 	@Autowired
 	InviteDAO inviteDao;
 
@@ -57,21 +59,19 @@ public class DashboardController {
 		if (!SessionChecker.checkForUserSession(request)) {
 			System.out.println("not logged in redirecting to login:");
 			return RedirectionUtil.redirectToLogin(request, respnose);
-			
+
 		} else {
 
-						
 			User user = userDao.getUserByEmail((String) request.getSession().getAttribute("user"));
-			
+
 			HashMap<String, Object> map = new HashMap<String, Object>();
 			map.put("name", "vikas");
-			
 
 			map.put("eventList", user.getParticipatingEvents());
-			System.out.println("events: "+map.get("eventList"));
-			
+			System.out.println("events: " + map.get("eventList"));
+
 			ModelAndView mv = new ModelAndView("dashboard", "map", map);
-			
+
 			return mv;
 
 		}
@@ -105,9 +105,9 @@ public class DashboardController {
 		System.out.println("userEmail: " + userEmail);
 		User user = userDao.getUserByEmail(userEmail);
 		event.setCreatedByUser(user);
-		if (user.addEvent(event)==false && event.addUserToEvent(user)==false) {
-			System.out.println("UPDATED USER: "+user);
-			System.out.println("UPDATED EVENT: "+event );
+		if (user.addEvent(event) == false && event.addUserToEvent(user) == false) {
+			System.out.println("UPDATED USER: " + user);
+			System.out.println("UPDATED EVENT: " + event);
 			System.out.println("user events and event user have been added in pojo");
 			map.put("eventId", event.getId());
 			map.put("eventName", event.getEventName());
@@ -133,31 +133,28 @@ public class DashboardController {
 			System.out.println("user is logged in");
 			if (request.getParameter("id") != null) {
 				String eventId = request.getParameter("id");
-				System.out.println("event id present: "+eventId);
+				System.out.println("event id present: " + eventId);
 				User user = userDao.getUserByEmail((String) request.getSession().getAttribute("user"));
-				
 
 				Event event = eventDao.getEventById(eventId);
-				System.out.println("event:"+event);
-				int isUserAdminOrParticipant = event.checkAdmin(user);
-				if (isUserAdminOrParticipant!=0) {
+				System.out.println("event:" + event);
+				int isUserAdminOrParticipant = event.checkAdminOrParticipant(user);
+				System.out.println("adminOrParticipant: "+isUserAdminOrParticipant);;
+				if (isUserAdminOrParticipant != 0) {
 					System.out.println("user is admin or participant");
 					HashMap<String, Object> map = new HashMap<String, Object>();
 					map.put("event", event);
-					
-					if (isUserAdminOrParticipant==1)
-					{
+
+					if (isUserAdminOrParticipant == 1) {
 						System.out.println("user is admin");
 						map.put("isUserAdmin", "true");
-					}
-					else
-					{
+					} else {
 						System.out.println("user is participant");
 					}
-					
+
 					request.setAttribute("newUserForEvent", new User());
 					return new ModelAndView("eventDetails", "map", map);
-					
+
 				} else {
 					// show error message here.. for now m redirect to dashboard
 					return new ModelAndView("redirect:/dashboard.htm");
@@ -181,39 +178,102 @@ public class DashboardController {
 			RedirectAttributes redirectAttributes) {
 		System.out.println("attempting to send invite");
 		if (request.getSession().getAttribute("user") != null) {
-			
-			if (bindingResult.hasErrors())
-			{
+
+			if (bindingResult.hasErrors()) {
 				System.out.println("new user to event bind eror");
 				System.out.println(bindingResult.getAllErrors());
 				System.out.println("UserInviteError");
-				return new ModelAndView("redirect:/dashboard/event.htm?id="+request.getParameter("eventId"));
+				return new ModelAndView("redirect:/dashboard/event.htm?id=" + request.getParameter("eventId"));
 			}
 			System.out.println("no binding errors");
-			User loggedInUser = userDao.getUserByEmail((String)request.getSession().getAttribute("user"));
+			User loggedInUser = userDao.getUserByEmail((String) request.getSession().getAttribute("user"));
 			if (loggedInUser != null) {
 				System.out.println("sending out invite link");
 				invite.setInviteFromUser(loggedInUser);
-				System.out.println("invite for:" +newUserForEvent.getEmail());
+				System.out.println("invite for:" + newUserForEvent.getEmail());
 				User inviteForUser = userDao.getUserByUserObjectWithEmail(newUserForEvent);
-				Event event = eventDao.getEventById((String)request.getParameter("eventId"));
+				Event event = eventDao.getEventById((String) request.getParameter("eventId"));
 				invite.setInviteForEvent(event);
-				invite.setCreatedDate(new Date());;
+				invite.setCreatedDate(new Date());
 				invite.setInviteForUser(inviteForUser);
+				invite.setActive(Boolean.TRUE);
+				inviteDao.invalidateStaleEvents(event.getId(), inviteForUser.getEmail());
+				
+				
+				String uniqueID = UUID.randomUUID().toString();
+				invite.setUniqueId(uniqueID);
 				inviteDao.saveInvite(invite);
+				String inviteURL = "http://u:8080/user/acceptInvite?uid="+uniqueID+"&user="+inviteForUser.getEmail();
 				System.out.println("invite sent");
-				return new ModelAndView("redirect:/dashboard/event.htm?id="+request.getParameter("eventId"));
-				 
-			}
-			else
-			{
-				return new ModelAndView("redirect:/dashboard/event.htm?id="+request.getParameter("eventId"));
+				return new ModelAndView("redirect:/dashboard/event.htm?id=" + request.getParameter("eventId"));
+
+			} else {
+				return new ModelAndView("redirect:/dashboard/event.htm?id=" + request.getParameter("eventId"));
 			}
 
 		} else {
 			return RedirectionUtil.redirectToLogin(request, response);
 		}
 
+	}
+
+	@RequestMapping(value = "/dashboard/user/acceptInviteDirect", method=RequestMethod.GET)
+	public ModelAndView acceptInvitation(HttpServletRequest request, HttpServletResponse response, @RequestParam("uid")String uid, @RequestParam("user") String inviteForUserEmail, @RequestParam("answer") String answer) {
+		
+		if (SessionChecker.checkForUserSession(request))
+		{
+			if (uid.trim().length()==0 || inviteForUserEmail.trim().length()==0 || answer.trim().length()==0)
+				return RedirectionUtil.redirectToLogin(request, response);
+			else
+			{
+				
+				Invite invite = inviteDao.getInvite(uid);
+				
+				if (invite.getActive()==Boolean.TRUE)
+				{
+					invite.setActive(Boolean.FALSE);
+					if (answer.equals("yes"))
+					invite.setInviteStatus(true);
+					else
+						invite.setInviteStatus(false);	
+					
+					User user = (User) userDao.getUserByEmail(inviteForUserEmail);
+					Event event = eventDao.getEventById((Long.toString(invite.getInviteForEvent().getId())));
+					event.addUserToEvent(user);
+					user.addEvent(event);
+					
+					userDao.mergeUser(user);
+					inviteDao.mergeInvite(invite);
+					System.out.println("invite has been accepted / rejected");
+				}
+				else
+				{
+					System.out.println("invalid invite");
+					return null;
+				}
+				return null;
+				
+			}
+		}
+		else
+		{
+			return RedirectionUtil.redirectToLogin(request, response);
+			
+		}
+		
+
+		
+	}
+	
+	@RequestMapping(value="/hidden/event.htm")
+	public ModelAndView eventShow(HttpServletRequest request)
+	{
+		String id = request.getParameter("id").trim();
+		System.out.println("######## Hidden: id: "+id);
+		Event event = eventDao.getEventById(id.toString());
+		System.out.println("########## hidden show");
+		System.out.println(event);
+		return null;
 	}
 
 }

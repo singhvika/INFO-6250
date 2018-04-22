@@ -14,5 +14,17 @@ public class RedirectionUtil {
 		return new ModelAndView("redirect:/login.htm");
 
 	}
+	
+	
+	public static String getCurrentUrl(HttpServletRequest request)
+	{
+		String currentUrl = request.getRequestURL().toString() + "?" + request.getQueryString();
+		return currentUrl;
+	}
+	
+	public ModelAndView redirectToNext(HttpServletRequest request, HttpServletResponse response, String redirectUrl)
+	{
+		return new ModelAndView("redirect:"+redirectUrl);
+	}
 
 }

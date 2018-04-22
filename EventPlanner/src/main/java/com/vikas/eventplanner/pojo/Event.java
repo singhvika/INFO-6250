@@ -55,7 +55,7 @@ public class Event {
 	@Transient
 	Collection<User> adminsUsers = new ArrayList<User>();
 
-	@ManyToMany()
+	@ManyToMany(fetch=FetchType.EAGER)
 	List<User> participatingUsers = new ArrayList<User>();
 
 	@Id
@@ -133,10 +133,7 @@ public class Event {
 		super();
 	}
 
-	@Override
-	public String toString() {
-		return "Event [eventName=" + eventName + ", fromDate=" + fromDate + ", toDate=" + toDate + ", id=" + id + "]";
-	}
+	
 
 	public Boolean addUserToEvent(User participant) {
 		Boolean userAlreadyExists = false;
@@ -155,7 +152,10 @@ public class Event {
 		
 		if (userAlreadyExists==false)
 		{
+			System.out.println("current Users:"+this.getParticipatingUsers());
+			System.out.println("user does not exists in event...adding");
 			this.getParticipatingUsers().add(participant);
+			System.out.println("new users:"+getParticipatingUsers());
 		}
 		
 		return userAlreadyExists;
@@ -166,12 +166,21 @@ public class Event {
 
 	public int checkAdminOrParticipant(User user) {
 		if (this.getCreatedByUser().getId()==user.getId())
+		{
+			System.out.println("user is admin of event");
 			return 1;
+		}
+			
 		
 		for(User u : this.getParticipatingUsers())
 		{
+			System.out.println("participating user: "+u.getId());
 			if (u.getId()==user.getId())
+			{
+				System.out.println("user is participant");
 				return 2;
+			}
+				
 				break;
 		}
 		
@@ -188,5 +197,15 @@ public class Event {
 			return 0;
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "Event [eventName=" + eventName + ", fromDate=" + fromDate + ", toDate=" + toDate + ", createdByUser="
+				+ createdByUser + ", adminsUsers=" + adminsUsers + ", participatingUsers=" + participatingUsers
+				+ ", id=" + id + ", itemList=" + itemList + "]";
+	}
+	
+	
+	
 
 }

@@ -36,6 +36,31 @@ public class EventDAO extends DAO {
 		System.out.println("found event: "+event);
 		return event;
 		
+
+	}
+	
+	
+	public boolean mergeEvent(Event event)
+	{
+		Session session = null;
+		Transaction tx = null;
+
+		try {
+			session = getSession();
+			tx = session.beginTransaction();
+			session.merge(event);
+			System.out.println("able to merge event");
+			tx.commit();
+			return true;
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			tx.rollback();
+			return false;
+		} finally {
+			if (session != null)
+				session.close();
+		}
 	}
 
 }

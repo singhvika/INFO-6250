@@ -144,12 +144,7 @@ public class User {
 		return duplicateEvent;
 	}
 
-	@Override
-	public String toString() {
-		return "User [pwdHash=" + pwdHash + ", email=" + email + ", firstName=" + firstName + ", lastName=" + lastName
-				+ ", pwd=" + pwd + ", id=" + id + ", participatingEvents=" + participatingEvents + "]";
-	}
-
+	
 	
 
 }
