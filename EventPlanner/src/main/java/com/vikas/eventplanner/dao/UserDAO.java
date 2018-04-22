@@ -109,6 +109,29 @@ public class UserDAO extends DAO {
 				session.close();
 		}
 	}
+	
+	public User getUserById(String id)
+	{
+		Session session = null;
+		Transaction tx = null;
+		try {
+			session = getSession();
+			Criteria cr = session.createCriteria(User.class);
+			cr.add(Restrictions.eq("id", Long.parseLong(id)));
+			User foundUser = (User) cr.uniqueResult();
+			System.out.println("foundUser: " + foundUser);
+			return foundUser;
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			if(tx!=null)
+			tx.rollback();
+			return null;
+		} finally {
+			if (session != null)
+				session.close();
+		}
+	}
 
 
 }

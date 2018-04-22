@@ -55,7 +55,7 @@ public class Event {
 	@Transient
 	Collection<User> adminsUsers = new ArrayList<User>();
 
-	@ManyToMany(fetch=FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.EAGER)
 	List<User> participatingUsers = new ArrayList<User>();
 
 	@Id
@@ -114,6 +114,12 @@ public class Event {
 	}
 
 	public List<User> getParticipatingUsers() {
+		System.out.println("participating users are from getters: ");
+		for(User u : participatingUsers)
+			{
+				System.out.println(u.id);
+			}
+		
 		return participatingUsers;
 	}
 
@@ -133,66 +139,57 @@ public class Event {
 		super();
 	}
 
-	
-
 	public Boolean addUserToEvent(User participant) {
 		Boolean userAlreadyExists = false;
-		
-		for (User user : getParticipatingUsers())
-		{
-			if (user.getEmail().equals(participant.getEmail()))
-			{
+
+		for (User user : getParticipatingUsers()) {
+			if (user.getEmail().equals(participant.getEmail())) {
 				userAlreadyExists = true;
 				System.out.println("duplicate user found");
 				break;
 			}
-				
-			
+
 		}
-		
-		if (userAlreadyExists==false)
-		{
-			System.out.println("current Users:"+this.getParticipatingUsers());
+
+		if (userAlreadyExists == false) {
+			System.out.println("current Users:" + this.getParticipatingUsers());
 			System.out.println("user does not exists in event...adding");
 			this.getParticipatingUsers().add(participant);
-			System.out.println("new users:"+getParticipatingUsers());
+			System.out.println("new users:" + getParticipatingUsers());
 		}
-		
-		return userAlreadyExists;
 
-		
+		return userAlreadyExists;
 
 	}
 
 	public int checkAdminOrParticipant(User user) {
-		if (this.getCreatedByUser().getId()==user.getId())
-		{
+		int adminOrUser = 0;
+		if (Long.toString(this.getCreatedByUser().getId()).equals(Long.toString(user.getId()))) {
 			System.out.println("user is admin of event");
 			return 1;
 		}
-			
-		
-		for(User u : this.getParticipatingUsers())
-		{
-			System.out.println("participating user: "+u.getId());
-			if (u.getId()==user.getId())
+		int counter = 1;
+		for (User u : getParticipatingUsers()) {
+			System.out.println("participating user: " + u.getId());
+			System.out.println("size:"+this.getParticipatingUsers().size());
+			System.out.println("COUNTER: "+counter);
+			counter=counter+1;
+			if (u.getId() == user.getId())
 			{
 				System.out.println("user is participant");
 				return 2;
 			}
-				
-				break;
 		}
-		
+
 		return 0;
 	}
 
 	public int checkAdmin(User user) {
 		System.out.println("checkin user is admin:");
-		if (this.getCreatedByUser().getId()==user.getId()) {
+		if (this.getCreatedByUser().getId() == user.getId()) {
 			System.out.println("user is admin");
 			return 1;
-			
+
 		} else {
 			return 0;
 		}
@@ -201,11 +198,7 @@ public class Event {
 	@Override
 	public String toString() {
 		return "Event [eventName=" + eventName + ", fromDate=" + fromDate + ", toDate=" + toDate + ", createdByUser="
-				+ createdByUser + ", adminsUsers=" + adminsUsers + ", participatingUsers=" + participatingUsers
-				+ ", id=" + id + ", itemList=" + itemList + "]";
+				+ createdByUser + ", id=" + id + "]";
 	}
-	
-	
-	
 
 }

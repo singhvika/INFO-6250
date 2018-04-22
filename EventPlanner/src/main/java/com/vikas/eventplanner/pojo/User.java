@@ -144,6 +144,13 @@ public class User {
 		return duplicateEvent;
 	}
 
+	@Override
+	public String toString() {
+		return "User [email=" + email + ", firstName=" + firstName + ", lastName=" + lastName + ", id=" + id + "]";
+	}
+
+	
+
 	
 	
 

@@ -135,9 +135,9 @@ public class DashboardController {
 				String eventId = request.getParameter("id");
 				System.out.println("event id present: " + eventId);
 				User user = userDao.getUserByEmail((String) request.getSession().getAttribute("user"));
-
+				System.out.println("USERID:"+user.getId());
 				Event event = eventDao.getEventById(eventId);
-				System.out.println("event:" + event);
+				System.out.println("eventId:" + event.getId());
 				int isUserAdminOrParticipant = event.checkAdminOrParticipant(user);
 				System.out.println("adminOrParticipant: "+isUserAdminOrParticipant);;
 				if (isUserAdminOrParticipant != 0) {
@@ -218,11 +218,11 @@ public class DashboardController {
 	}
 
 	@RequestMapping(value = "/dashboard/user/acceptInviteDirect", method=RequestMethod.GET)
-	public ModelAndView acceptInvitation(HttpServletRequest request, HttpServletResponse response, @RequestParam("uid")String uid, @RequestParam("user") String inviteForUserEmail, @RequestParam("answer") String answer) {
+	public ModelAndView acceptInvitation(HttpServletRequest request, HttpServletResponse response, @RequestParam("uid")String uid, @RequestParam("user") String userId, @RequestParam("answer") String answer) {
 		
 		if (SessionChecker.checkForUserSession(request))
 		{
-			if (uid.trim().length()==0 || inviteForUserEmail.trim().length()==0 || answer.trim().length()==0)
+			if (uid.trim().length()==0 || userId.trim().length()==0 || answer.trim().length()==0)
 				return RedirectionUtil.redirectToLogin(request, response);
 			else
 			{
@@ -235,9 +235,9 @@ public class DashboardController {
 					if (answer.equals("yes"))
 					invite.setInviteStatus(true);
 					else
-						invite.setInviteStatus(false);	
+						invite.setInviteStatus(true);	
 					
-					User user = (User) userDao.getUserByEmail(inviteForUserEmail);
+					User user = (User) userDao.getUserById(userId);
 					Event event = eventDao.getEventById((Long.toString(invite.getInviteForEvent().getId())));
 					event.addUserToEvent(user);
 					user.addEvent(event);
@@ -272,7 +272,17 @@ public class DashboardController {
 		System.out.println("######## Hidden: id: "+id);
 		Event event = eventDao.getEventById(id.toString());
 		System.out.println("########## hidden show");
-		System.out.println(event);
+		System.out.println(event.getParticipatingUsers());
+		return null;
+	}
+	
+	@RequestMapping(value="/hidden/user.htm")
+	public ModelAndView userShow(HttpServletRequest request)
+	{
+		String id = request.getParameter("id");
+		User user = userDao.getUserById(id);
+		System.out.println("##### HIDDEN SHOW");
+		System.out.println(user.getParticipatingEvents());
 		return null;
 	}
 
