@@ -135,11 +135,12 @@ public class DashboardController {
 				String eventId = request.getParameter("id");
 				System.out.println("event id present: " + eventId);
 				User user = userDao.getUserByEmail((String) request.getSession().getAttribute("user"));
-				System.out.println("USERID:"+user.getId());
+				System.out.println("USERID:" + user.getId());
 				Event event = eventDao.getEventById(eventId);
 				System.out.println("eventId:" + event.getId());
 				int isUserAdminOrParticipant = event.checkAdminOrParticipant(user);
-				System.out.println("adminOrParticipant: "+isUserAdminOrParticipant);;
+				System.out.println("adminOrParticipant: " + isUserAdminOrParticipant);
+				;
 				if (isUserAdminOrParticipant != 0) {
 					System.out.println("user is admin or participant");
 					HashMap<String, Object> map = new HashMap<String, Object>();
@@ -198,12 +199,11 @@ public class DashboardController {
 				invite.setInviteForUser(inviteForUser);
 				invite.setActive(Boolean.TRUE);
 				inviteDao.invalidateStaleEvents(event.getId(), inviteForUser.getEmail());
-				
-				
+
 				String uniqueID = UUID.randomUUID().toString();
 				invite.setUniqueId(uniqueID);
 				inviteDao.saveInvite(invite);
-				String inviteURL = "http://u:8080/user/acceptInvite?uid="+uniqueID+"&user="+inviteForUser.getEmail();
+				String inviteURL = "http://u:8080/user/invite?uid=" + uniqueID;
 				System.out.println("invite sent");
 				return new ModelAndView("redirect:/dashboard/event.htm?id=" + request.getParameter("eventId"));
 
@@ -217,68 +217,88 @@ public class DashboardController {
 
 	}
 
-	@RequestMapping(value = "/dashboard/user/acceptInviteDirect", method=RequestMethod.GET)
-	public ModelAndView acceptInvitation(HttpServletRequest request, HttpServletResponse response, @RequestParam("uid")String uid, @RequestParam("user") String userId, @RequestParam("answer") String answer) {
-		
-		if (SessionChecker.checkForUserSession(request))
-		{
-			if (uid.trim().length()==0 || userId.trim().length()==0 || answer.trim().length()==0)
-				return RedirectionUtil.redirectToLogin(request, response);
+	@RequestMapping(value = "/dashboard/user/invite.htm")
+	public ModelAndView showInvite(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("uid") String uid, ModelMap map) {
+		if (SessionChecker.checkForUserSession(request) == false) {
+			return RedirectionUtil.redirectToLogin(request, response);
+		}
+
+		if (uid.trim().length() != 0) {
+			
+			System.out.println("invite is proper");
+			Invite invite = inviteDao.getInvite(uid);
+			User user = userDao.getUserById(Long.toString(invite.getInviteForUser().getId()));
+			if (request.getSession().getAttribute("user").equals(user.getEmail()))
+			{
+			map.addAttribute("invite", invite);
+			return new ModelAndView("invite", "map", map);
+			}
 			else
 			{
-				
-				Invite invite = inviteDao.getInvite(uid);
-				
-				if (invite.getActive()==Boolean.TRUE)
-				{
-					invite.setActive(Boolean.FALSE);
-					if (answer.equals("yes"))
-					invite.setInviteStatus(true);
-					else
-						invite.setInviteStatus(true);	
-					
-					User user = (User) userDao.getUserById(userId);
-					Event event = eventDao.getEventById((Long.toString(invite.getInviteForEvent().getId())));
-					event.addUserToEvent(user);
-					user.addEvent(event);
-					
-					userDao.mergeUser(user);
-					inviteDao.mergeInvite(invite);
-					System.out.println("invite has been accepted / rejected");
-				}
-				else
-				{
-					System.out.println("invalid invite");
-					return null;
-				}
-				return null;
-				
+				return new ModelAndView("inviteError");
 			}
 		}
-		else
-		{
-			return RedirectionUtil.redirectToLogin(request, response);
-			
-		}
-		
+		return new ModelAndView("redirect:/dashboard.htm");
 
-		
 	}
-	
-	@RequestMapping(value="/hidden/event.htm")
-	public ModelAndView eventShow(HttpServletRequest request)
-	{
+
+	@RequestMapping(value = "/dashboard/user/acceptInvite.htm", method = RequestMethod.GET)
+	public ModelAndView acceptInvitation(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("uid") String uid, @RequestParam("answer") String answer) {
+
+		if (SessionChecker.checkForUserSession(request)) {
+			if (uid.trim().length() == 0 || answer.trim().length() == 0)
+				return RedirectionUtil.redirectToLogin(request, response);
+			else {
+
+				Invite invite = inviteDao.getInvite(uid);
+				User forUserTest = userDao.getUserById(Long.toString(invite.getInviteForUser().getId()));
+				if (invite.getActive() == Boolean.TRUE
+						&& forUserTest.getEmail().equals(request.getSession().getAttribute("user"))) {
+					invite.setActive(Boolean.FALSE);
+					if (answer.equalsIgnoreCase("yes")) {
+
+						Event event = eventDao.getEventById((Long.toString(invite.getInviteForEvent().getId())));
+						User user = (User) userDao.getUserById(Long.toString(invite.getInviteForUser().getId()));
+						event.addUserToEvent(user);
+						user.addEvent(event);
+						System.out.println("user events: "+user.getParticipatingEvents());
+						userDao.mergeUser(user);
+						inviteDao.mergeInvite(invite);
+						System.out.println("invite has been accepted ");
+						return new ModelAndView("redirect:/dashboard.htm");
+					} else {
+						invite.setActive(Boolean.FALSE);
+						invite.setInviteStatus(Boolean.FALSE);
+						System.out.println("invite has been rejected");
+						return new ModelAndView("redirect:/dashboard.htm");
+					}
+				} else {
+					System.out.println("invalid invite");
+					return new ModelAndView("inviteError");
+				}
+
+			}
+		} else {
+			return RedirectionUtil.redirectToLogin(request, response);
+
+		}
+
+	}
+
+	@RequestMapping(value = "/hidden/event.htm")
+	public ModelAndView eventShow(HttpServletRequest request) {
 		String id = request.getParameter("id").trim();
-		System.out.println("######## Hidden: id: "+id);
+		System.out.println("######## Hidden: id: " + id);
 		Event event = eventDao.getEventById(id.toString());
 		System.out.println("########## hidden show");
 		System.out.println(event.getParticipatingUsers());
 		return null;
 	}
-	
-	@RequestMapping(value="/hidden/user.htm")
-	public ModelAndView userShow(HttpServletRequest request)
-	{
+
+	@RequestMapping(value = "/hidden/user.htm")
+	public ModelAndView userShow(HttpServletRequest request) {
 		String id = request.getParameter("id");
 		User user = userDao.getUserById(id);
 		System.out.println("##### HIDDEN SHOW");
