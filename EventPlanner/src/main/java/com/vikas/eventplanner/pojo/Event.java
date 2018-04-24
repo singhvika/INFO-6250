@@ -1,5 +1,8 @@
 package com.vikas.eventplanner.pojo;
 
+import static org.junit.Assert.assertEquals;
+
+import java.awt.event.InvocationEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -21,8 +24,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.criteria.Fetch;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
@@ -55,15 +60,25 @@ public class Event {
 	@Transient
 	Collection<User> adminsUsers = new ArrayList<User>();
 
-	@ManyToMany(fetch = FetchType.EAGER)
+	@ManyToMany()
 	List<User> participatingUsers = new ArrayList<User>();
+
+	Boolean active = true;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	long id;
 
-	@Embedded
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "participatingEvent")
 	Collection<Item> itemList = new ArrayList<Item>();
+
+	public Boolean getActive() {
+		return active;
+	}
+
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
 
 	public Collection<User> getAdminsUsers() {
 		return adminsUsers;
@@ -115,11 +130,10 @@ public class Event {
 
 	public List<User> getParticipatingUsers() {
 		System.out.println("participating users are from getters: ");
-		for(User u : participatingUsers)
-			{
-				System.out.println(u.id);
-			}
-		
+		for (User u : participatingUsers) {
+			System.out.println(u.id);
+		}
+
 		return participatingUsers;
 	}
 
@@ -163,19 +177,19 @@ public class Event {
 	}
 
 	public int checkAdminOrParticipant(User user) {
-		int adminOrUser = 0;
-		if (Long.toString(this.getCreatedByUser().getId()).equals(Long.toString(user.getId()))) {
+		
+		System.out.println("admin of the event is: "+this.getCreatedByUser().getId());
+		if (this.getCreatedByUser().getId()==user.getId()) {
 			System.out.println("user is admin of event");
 			return 1;
 		}
 		int counter = 1;
 		for (User u : getParticipatingUsers()) {
 			System.out.println("participating user: " + u.getId());
-			System.out.println("size:"+this.getParticipatingUsers().size());
-			System.out.println("COUNTER: "+counter);
-			counter=counter+1;
-			if (u.getId() == user.getId())
-			{
+			System.out.println("size:" + this.getParticipatingUsers().size());
+			System.out.println("COUNTER: " + counter);
+			counter = counter + 1;
+			if (u.getId()==user.getId()) {
 				System.out.println("user is participant");
 				return 2;
 			}
@@ -199,6 +213,22 @@ public class Event {
 	public String toString() {
 		return "Event [eventName=" + eventName + ", fromDate=" + fromDate + ", toDate=" + toDate + ", createdByUser="
 				+ createdByUser + ", id=" + id + "]";
+	}
+	
+	
+	public boolean addItem(Item item)
+	{
+		boolean flag = false;
+		for( Item i : this.getItemList() )
+		{
+			if (i.getName().equalsIgnoreCase(item.getName()))
+			{
+				flag = true;
+				return false;
+			}
+		}
+		 this.getItemList().add(item);
+		 return true;
 	}
 
 }

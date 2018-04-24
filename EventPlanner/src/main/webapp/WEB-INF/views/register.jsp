@@ -14,15 +14,39 @@
 
 ############## ${contextPath}
 <%@ include file="/resources/static/navbar.jsp" %>
-	<form:form action="register.htm" method="POST" commandName="user"
-		modelAttribute="user">
-		email:<form:input path="email" name="email" /><br>
-		<form:errors path="email" /><br>
-		password<form:input path="pwd" name="pwd" type="password" /><br>
-		First Name: <form:input path="firstName" name="firstName" required="required"></form:input><form:errors path="firstName"></form:errors>
-		Last Name: <form:input path="lastName" name="lastName"></form:input><form:errors path="lastName"></form:errors>
-		<input type="submit" name="submit" value="submit"/><form:errors path="pwd" /><br>
-	</form:form>
+	<div class="container">
+		<div class="col-md-6 col-md-offset-3 col-xs-12 col-lg-6 col-lg-offset-3 col-sm-12">
+			<form:form action="register.htm" method="POST" commandName="user"
+				modelAttribute="user">
+				<div class="form-group">
+					<label>Email:</label>
+					<form:input path="email" name="email" class="form-control"></form:input>
+					<form:errors path="email"></form:errors>
+				</div>
+				<div class="form-group">
+					<label>Password</label>
+					<form:input path="pwd" name="pwd" type="password" class="form-control"></form:input>
+					<form:errors path="pwd"></form:errors>
+				</div>
+				
+				<div class="form-group">
+					<label>First Name:</label>
+				<form:input path="firstName" name="firstName" required="required" class="form-control"></form:input>
+				<form:errors path="firstName"></form:errors>
+				</div>
+				
+				<div class="form-group">
+					<label>Last Name: </label>
+					<form:input path="lastName" name="lastName" class="form-control"></form:input>
+					<form:errors path="lastName"></form:errors>
+				</div>
+								
+				<input type="submit" name="submit" value="submit" class="btn-success btn"/><form:errors path="pwd" /><br>
+			</form:form>
+		</div>
+	</div>
+
+	
 	
 	Register Status: 	${registerError} 
 

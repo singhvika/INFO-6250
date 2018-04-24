@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.hibernate.Session;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -31,8 +32,6 @@ import com.vikas.eventplanner.pojo.User;
 import com.vikas.eventplanner.services.AuthenticationService;
 import com.vikas.eventplanner.utils.SessionChecker;
 
-
-
 @Controller
 public class AuthenticationController {
 
@@ -44,42 +43,36 @@ public class AuthenticationController {
 			req.setAttribute("user", user);
 			return mv;
 		} else {
-			return new ModelAndView("redirect:/");
+			return new ModelAndView("redirect:/dashboard.htm");
 		}
 	}
 
 	@RequestMapping(value = "/login.htm", method = RequestMethod.POST)
 	public ModelAndView performLogin(HttpServletRequest req, HttpServletResponse res,
-			@ModelAttribute("user") @Validated User user, BindingResult bindingResult, AuthenticationService authenticationService, UserDAO userDAO) {
-		
+			@ModelAttribute("user") @Validated User user, BindingResult bindingResult,
+			AuthenticationService authenticationService, UserDAO userDAO) {
+
 		System.out.println("now attempting login: ");
 		if (SessionChecker.checkForUserSession(req) == false) {
 			System.out.println("beginning authentication:");
-			if(authenticationService.authenticate(user)==true)
-			{
+			if (authenticationService.authenticate(user) == true) {
 				System.out.println("authentication successfull");
 				SessionChecker.getSessionForUser(req, user.getEmail());
 				return new ModelAndView("redirect:/");
-				
-			}
-			else
-			{
+
+			} else {
 				System.out.println("could noe authenticate");
 				ModelAndView mv = new ModelAndView("login");
-				Map<Object, Object> map = new HashMap<Object,Object>();
+				Map<Object, Object> map = new HashMap<Object, Object>();
 				map.put("loginError", "Invalid User Credentials, Please Try again");
 				return mv;
 			}
-			
-			
-			
+
 		}
 
 		return new ModelAndView("redirect:/");
 
 	}
-	
-	
 
 	@RequestMapping(value = "/register.htm", method = RequestMethod.GET)
 	public ModelAndView showRegister(HttpServletRequest request, HttpServletResponse response, ModelMap map) {
@@ -99,37 +92,29 @@ public class AuthenticationController {
 	public ModelAndView processRegister(RedirectAttributes redirectAttributes, HttpServletRequest request,
 			HttpServletResponse response, @ModelAttribute("user") @Validated User user, BindingResult bindingResult,
 			ModelMap map, UserDAO userDao) {
-		if (bindingResult.hasErrors() ){
+		if (bindingResult.hasErrors()) {
 			return new ModelAndView("register");
 
-			}
-		
-		
-			user.setPwdHash(request.getParameter("pwd"));
-			if (userDao.saveUser(user))
-			{
-				System.out.println("SUCCSS REGISTER");
-				return new ModelAndView("redirect:/");
-			}
-			
-		
-			ModelAndView mv = new ModelAndView("register");
-			mv.addObject("registerError","Duplicates");
-			return mv;
-		
-			
-		
+		}
 
-	//	String pwdHash = BCrypt.hashpw(request.getParameter("pwd"), BCrypt.gensalt());
-		
-		
+		String hashpwd = BCrypt.hashpw(request.getParameter("pwd"), BCrypt.gensalt());
+		user.setPwdHash(hashpwd);
+		if (userDao.saveUser(user)) {
+			System.out.println("SUCCSS REGISTER");
+			return new ModelAndView("redirect:/");
+		}
 
-		
+		ModelAndView mv = new ModelAndView("register");
+		mv.addObject("registerError", "Duplicates");
+		return mv;
+
+		// String pwdHash = BCrypt.hashpw(request.getParameter("pwd"),
+		// BCrypt.gensalt());
+
 	}
-	
-	@RequestMapping(value="/logout.htm")
-	public ModelAndView logout(HttpServletRequest request)
-	{
+
+	@RequestMapping(value = "/logout.htm")
+	public ModelAndView logout(HttpServletRequest request) {
 		request.getSession().invalidate();
 		return new ModelAndView("redirect:/");
 	}

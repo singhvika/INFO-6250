@@ -21,9 +21,9 @@
 		<br>
 		<form:errors path="eventName" />
 		<br>
-		Evetn Start Date: <form:input path="fromDate" type="date" name="fromDate" required="required" />
+		Evetn Start Date: <form:input path="fromDate" type="date" name="fromDate" required="required" /><form:errors path="fromDate"/>
 		<br>
-		Evetn End Date: <form:input path="toDate" type="date" name="toDate" required="required" />
+		Evetn End Date: <form:input path="toDate" type="date" name="toDate" required="required" /><form:errors path="toDate"/>
 		<br>
 		<input type="submit" value="create" />
 	</form:form>

@@ -14,5 +14,6 @@
         <mapping class="com.vikas.eventplanner.pojo.User"/>
         <mapping class="com.vikas.eventplanner.pojo.Event"/>
         <mapping class="com.vikas.eventplanner.pojo.Invite"/>
+        <mapping class="com.vikas.eventplanner.pojo.Item"/>
     </session-factory>
 </hibernate-configuration>

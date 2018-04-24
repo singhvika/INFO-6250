@@ -2,6 +2,7 @@ package com.vikas.eventplanner.services;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -34,7 +35,10 @@ public class AuthenticationService {
 			System.out.println("now matching");
 			System.out.println("INCOMING PWD: "+incomingUser.getPwd());
 			System.out.println("DB PWD: "+user.getPwdHash());
-			if (incomingUser.getPwd().equals(user.getPwdHash()))
+			
+			
+			
+			if (BCrypt.checkpw(incomingUser.getPwd(), user.getPwdHash()))
 			{
 				System.out.println("user matched");
 				pwdCheck=true;

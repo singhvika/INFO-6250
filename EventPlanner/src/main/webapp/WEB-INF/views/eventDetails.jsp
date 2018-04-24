@@ -10,42 +10,140 @@
 <%@ include file="/resources/static/head.jsp"%>
 </head>
 <body>
-	<br> EVENT NAME : ${map.event.eventName}
 	<%@ include file="/resources/static/navbar.jsp"%>
+
+	
+	
+	<c:if test="${not empty map.isUserAdmin}">
+		<c:set var="isAdmin" value="true" />
+	</c:if>
+	ADMINs: ${isAdmin }
+	<form action = "${contextPath}/dashboard/event/summary.htm">
+	<input type="hidden" name="eventId" value="${map.event.id }"/>
+	<input type="submit" value="Show Summary"/>
+	</form>
+	
+	
+	<br> EVENT Details
+	<br> EVENT NAME : ${map.event.eventName} : ${map.event.id}
+	<br> EVENT STATUS : ${map.event.active}
+	<br> EVENT PACKUP :
+	<c:choose>
+		<c:when test="${map.event.active}">
+			<c:if test="${ isAdmin}">
+			<form
+				action="${contextPath}/dashboard/event/packup.htm?action=deactivate"
+				method="POST">
+				<input type="submit" value="Packup" /><input type="hidden"
+					name="eventId" value="${map.event.id}" />
+			</form>
+			</c:if>
+		</c:when>
+		<c:otherwise>
+			<c:if test="${isAdmin }">
+			<form
+				action="${contextPath}/dashboard/event/packup.htm?action=activate"
+				method="POST">
+				<input type="submit" value="Activate" /><input type="hidden"
+					name="eventId" value="${map.event.id}" />
+			</form>
+			</c:if>
+		</c:otherwise>
+	</c:choose>
+
+
+
 	<br> USER LIST:
 	<br>
 	<c:forEach items="${map.event.participatingUsers}"
 		var="participatingUser">
 ${participatingUser.firstName} | ${participatingUser.email} <br>
 	</c:forEach>
-	<br> ITEM LIST:
+	<br>
 
-
-	<c:if test="${not empty map.isUserAdmin}">
-		<form:form action="${contextPath}/dashboard/event/addUser.htm"
-			modelAttribute="newUserForEvent">
-			User Email<form:input path="email" name="email"/>
-			<input type="submit" value="Send Invite" />
-			<input type="hidden" name="eventId" value="${map.event.id} " />
-		</form:form>
+	<c:if test="${isAdmin}">
+	Button for new members
+		<form action="${contextPath}/dashboard/event/addUser.htm" method="GET">
+			<input type="hidden" name="eventId" value="${map.event.id }" /> <input
+				type="submit" value="Add Members" />
+		</form>
 	</c:if>
 
+	<br> ITEM LIST:
+	<br>
+
+	<table border="2">
+		<tr>
+			<th>Item Name</th>
+			<th>Requested Quantity</th>
+			<th>FullFilled By</th>
+			<th>Fullfilled Quantitty</th>
+			<th>Total Price</th>
+		</tr>
+		<c:forEach items="${map.event.itemList}" var="item">
+			<tr>
+				<td>${item.name }</td>
+				<td>${item.requestedQuantity }</td>
+
+				<c:choose>
+					<c:when test="${empty item.fullfilledByUser }">
+						<td colspan="3"><form
+								action="${contextPath }/dashboard/event/item/claimItem.htm"
+								method="GET">
+								<input type="hidden" name="itemId" value="${item.id }" /> <input
+									type="hidden" value="${map.event.id}" name="eventId" /> <input
+									type="submit" value="Claim" />
+							</form></td>
+					</c:when>
+
+					<c:otherwise>
+						<td>${item.fullfilledByUser }</td>
+						<td>${item.fullFulledQuantity }</td>
+						<td>${item.totalPrice}</td>
+
+					</c:otherwise>
+				</c:choose>
+
+				<c:if test="${empty item.fullfilledByUser}">
+
+				</c:if>
+
+			</tr>
+		</c:forEach>
+
+	</table>
+	
+	<c:if test="${isAdmin }">
+	<form:form action="${contextPath}/dashboard/event/addItem.htm" method="POST" modelAttribute="eventItem">
+	<input type="hidden" name="eventId" value="${map.event.id }"/>
+	Item Name:<form:input path="name" name="itemName" required="required" /><form:errors path="name"/><form:errors path="name"/><br>
+	Requested Quantity:<form:input path="requestedQuantity" name="requestedQuantity" required="required" /><form:errors path="requestedQuantity"/>
+	<br>
+	<input type="submit" value="Add Items"/>
+	</form:form>
+	</c:if>
+	
+	
+		<c:if test="${not map.event.active}">
+	CANNOT CLAIM ITEMS..EVENT IS INACTIVE
+	</c:if>
+
+	<c:choose>
+		<c:when test="${map.event.active}">
 
 
-	<br>
-	<br>
-	<br> Add new ITEMS:
-	<br> Item Name:
-	<%-- <form:form
-		action="${pageContext.request.contextPath}/dashboard/event/itemadd?eventId=${event.id}">
-		<form:input path="name" />
-		<form:errors path="name"></form:errors>
-	Unit Price:
-	<form:input path="unitPrice" />
-		<form:errors path="unitPrice"></form:errors>
-	Requested Quantity:
-	<form:input path="requestedQuanntity" />
-		<form:errors path="requestedQuanntity"></form:errors>
-	</form:form> --%>
+		</c:when>
+
+		<c:otherwise>
+			<br>
+		CANNOT ADD NEW MEMBERS OR ITEMS... EVENT IS INACTIVE
+		</c:otherwise>
+	</c:choose>
+
+
+
+
+
+
 </body>
 </html>

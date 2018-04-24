@@ -148,6 +148,17 @@ public class User {
 	public String toString() {
 		return "User [email=" + email + ", firstName=" + firstName + ", lastName=" + lastName + ", id=" + id + "]";
 	}
+	
+	
+	public int getTotalEventPagesByUser()
+	{
+		if (this.getParticipatingEvents().size()<6)
+			return 1;
+		
+		double pages = this.getParticipatingEvents().size() / (double)5;
+		int intPages =(int) Math.ceil(pages);
+		return intPages;
+	}
 
 	
 
