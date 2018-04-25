@@ -12,18 +12,21 @@
 <body>
 	<%@ include file="/resources/static/navbar.jsp"%>
 
-	
-	
+	<form action="${contextPath }/dashboard/event/downloadPDF">
+		<input type="hidden" name="eventId" value="${map.event.id }" /> <input
+			type="submit" value="PDF Report" />
+	</form>
+
 	<c:if test="${not empty map.isUserAdmin}">
 		<c:set var="isAdmin" value="true" />
 	</c:if>
 	ADMINs: ${isAdmin }
-	<form action = "${contextPath}/dashboard/event/summary.htm">
-	<input type="hidden" name="eventId" value="${map.event.id }"/>
-	<input type="submit" value="Show Summary"/>
+	<form action="${contextPath}/dashboard/event/summary.htm">
+		<input type="hidden" name="eventId" value="${map.event.id }" /> <input
+			type="submit" value="Show Summary" />
 	</form>
-	
-	
+
+
 	<br> EVENT Details
 	<br> EVENT NAME : ${map.event.eventName} : ${map.event.id}
 	<br> EVENT STATUS : ${map.event.active}
@@ -31,22 +34,22 @@
 	<c:choose>
 		<c:when test="${map.event.active}">
 			<c:if test="${ isAdmin}">
-			<form
-				action="${contextPath}/dashboard/event/packup.htm?action=deactivate"
-				method="POST">
-				<input type="submit" value="Packup" /><input type="hidden"
-					name="eventId" value="${map.event.id}" />
-			</form>
+				<form
+					action="${contextPath}/dashboard/event/packup.htm?action=deactivate"
+					method="POST">
+					<input type="submit" value="Packup" /><input type="hidden"
+						name="eventId" value="${map.event.id}" />
+				</form>
 			</c:if>
 		</c:when>
 		<c:otherwise>
 			<c:if test="${isAdmin }">
-			<form
-				action="${contextPath}/dashboard/event/packup.htm?action=activate"
-				method="POST">
-				<input type="submit" value="Activate" /><input type="hidden"
-					name="eventId" value="${map.event.id}" />
-			</form>
+				<form
+					action="${contextPath}/dashboard/event/packup.htm?action=activate"
+					method="POST">
+					<input type="submit" value="Activate" /><input type="hidden"
+						name="eventId" value="${map.event.id}" />
+				</form>
 			</c:if>
 		</c:otherwise>
 	</c:choose>
@@ -79,6 +82,7 @@ ${participatingUser.firstName} | ${participatingUser.email} <br>
 			<th>FullFilled By</th>
 			<th>Fullfilled Quantitty</th>
 			<th>Total Price</th>
+			<th>Delete Action</th>
 		</tr>
 		<c:forEach items="${map.event.itemList}" var="item">
 			<tr>
@@ -94,13 +98,28 @@ ${participatingUser.firstName} | ${participatingUser.email} <br>
 									type="hidden" value="${map.event.id}" name="eventId" /> <input
 									type="submit" value="Claim" />
 							</form></td>
+							<td><form
+								action="${contextPath }/dashboard/event/item/deleteitem.htm"
+								method="POST">
+								<input type="hidden" name="itemId" value="${item.id }" /> <input
+									type="hidden" name="eventId" value="${map.event.id }" />
+								<input type="submit" value="DELETE" name="submit"/>
+							</form></td>
+							
+
 					</c:when>
 
 					<c:otherwise>
 						<td>${item.fullfilledByUser }</td>
 						<td>${item.fullFulledQuantity }</td>
 						<td>${item.totalPrice}</td>
-
+						<td><form
+								action="${contextPath }/dashboard/event/item/deleteitem.htm"
+								method="POST">
+								<input type="hidden" name="itemId" value="${item.id }" /> <input
+									type="hidden" name="eventId" value="${map.event.id }" />
+								<input type="submit" value="DELETE" name="submit"/>
+							</form></td>
 					</c:otherwise>
 				</c:choose>
 
@@ -112,19 +131,26 @@ ${participatingUser.firstName} | ${participatingUser.email} <br>
 		</c:forEach>
 
 	</table>
-	
+
 	<c:if test="${isAdmin }">
-	<form:form action="${contextPath}/dashboard/event/addItem.htm" method="POST" modelAttribute="eventItem">
-	<input type="hidden" name="eventId" value="${map.event.id }"/>
-	Item Name:<form:input path="name" name="itemName" required="required" /><form:errors path="name"/><form:errors path="name"/><br>
-	Requested Quantity:<form:input path="requestedQuantity" name="requestedQuantity" required="required" /><form:errors path="requestedQuantity"/>
-	<br>
-	<input type="submit" value="Add Items"/>
-	</form:form>
+		<c:if test="${map.event.active }">
+			<form:form action="${contextPath}/dashboard/event/addItem.htm"
+				method="POST" modelAttribute="eventItem">
+				<input type="hidden" name="eventId" value="${map.event.id }" />
+	Item Name:<form:input path="name" name="itemName" required="required" />
+				<form:errors path="name" />
+				<form:errors path="name" />
+				<br>
+	Requested Quantity:<form:input path="requestedQuantity"
+					name="requestedQuantity" required="required" />
+				<form:errors path="requestedQuantity" />
+				<br>
+				<input type="submit" value="Add Items" />
+			</form:form>
+		</c:if>
 	</c:if>
-	
-	
-		<c:if test="${not map.event.active}">
+
+	<c:if test="${not map.event.active}">
 	CANNOT CLAIM ITEMS..EVENT IS INACTIVE
 	</c:if>
 

@@ -128,5 +128,58 @@ public class ItemDAO extends DAO {
 				session.close();
 		}
 	}
+	
+	
+	public boolean deleteItem(String itemId)
+	{
+		Session session = null;
+		Transaction tx = null;
+		try
+		{
+			System.out.println("ITEM ID FOR DELETION: "+itemId);
+			session = getSession();
+			tx = session.beginTransaction();
+			long id;
+			try {
+				 id = (long)Long.parseLong(itemId);	
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+				return false;
+				
+			}
+			
+			Criteria cr = session.createCriteria(Item.class);
+			cr.add(Restrictions.eq("id",id));
+			Item item = (Item)cr.uniqueResult();
+			System.out.println("ITEM FOR DELETION: "+item);
+			if (item!=null)
+			{
+				
+				session.delete(item);
+				System.out.println("deletd successfully");
+				tx.commit();
+				return true;
+			}
+			return false;
+			
+			
+			
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			if (tx!=null)
+				tx.rollback();
+			return false;
+		}
+		finally {
+			if (session!=null)
+			{
+				session.close();
+			}
+		}
+	}
 
 }

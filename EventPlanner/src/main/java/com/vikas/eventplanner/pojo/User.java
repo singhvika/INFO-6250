@@ -40,27 +40,28 @@ public class User {
 	@NotEmpty
 	@Email
 	String email;
-	
-	@Column(name="firstName",nullable=false)
+
+	@Column(name = "firstName", nullable = false)
 	@NotEmpty
 	String firstName;
-	
-	@Column(name="lastName", nullable=true)
+
+	@Column(name = "lastName", nullable = true)
 	String lastName;
 
 	@Transient
+	@NotEmpty
 	String pwd;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	long id;
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy="participatingUsers")	
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "participatingUsers")
 	Collection<Event> participatingEvents = new ArrayList<Event>();
 
 	public User() {
 		super();
-		
+
 	}
 
 	public String getPwdHash() {
@@ -95,9 +96,6 @@ public class User {
 		this.pwd = pwd;
 	}
 
-	
-	
-
 	public Collection<Event> getParticipatingEvents() {
 		return participatingEvents;
 	}
@@ -122,23 +120,19 @@ public class User {
 		this.lastName = lastName;
 	}
 
-	
 	public boolean addEvent(Event event) {
 		boolean duplicateEvent = false;
 		System.out.println("Checking user Events of size: " + this.getParticipatingEvents().size());
-		
-		for (Event even : this.getParticipatingEvents())
-		{
-			if (even.getEventName().equals(event.getEventName()))
-			{
+
+		for (Event even : this.getParticipatingEvents()) {
+			if (even.getEventName().equals(event.getEventName())) {
 				duplicateEvent = true;
-				
+
 				break;
 			}
 		}
-		
-		if (duplicateEvent==false)
-		{
+
+		if (duplicateEvent == false) {
 			this.getParticipatingEvents().add(event);
 		}
 		return duplicateEvent;
@@ -148,21 +142,14 @@ public class User {
 	public String toString() {
 		return "User [email=" + email + ", firstName=" + firstName + ", lastName=" + lastName + ", id=" + id + "]";
 	}
-	
-	
-	public int getTotalEventPagesByUser()
-	{
-		if (this.getParticipatingEvents().size()<6)
+
+	public int getTotalEventPagesByUser() {
+		if (this.getParticipatingEvents().size() < 6)
 			return 1;
-		
-		double pages = this.getParticipatingEvents().size() / (double)5;
-		int intPages =(int) Math.ceil(pages);
+
+		double pages = this.getParticipatingEvents().size() / (double) 5;
+		int intPages = (int) Math.ceil(pages);
 		return intPages;
 	}
-
-	
-
-	
-	
 
 }

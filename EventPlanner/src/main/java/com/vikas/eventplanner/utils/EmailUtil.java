@@ -6,9 +6,8 @@ import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 
 public class EmailUtil {
-	
-	public boolean sendEmail(String from, String to, String msgBody, String title)
-	{
+
+	public static boolean sendEmail(String from, String to, String msgBody, String title) {
 		try {
 			Email email = new SimpleEmail();
 			email.setHostName("smtp.googlemail.com");
@@ -16,8 +15,8 @@ public class EmailUtil {
 			email.setAuthenticator(new DefaultAuthenticator("contactapplication2018@gmail.com", "springmvc"));
 			email.setSSLOnConnect(true);
 			email.setFrom("event-planner@msis.neu.edu"); // This user email does not
-													// exist
-			email.setSubject("Event Invite from, "+from);
+			// exist
+			email.setSubject(title);
 			email.setMsg(msgBody); // Retrieve email from the DAO and send this
 			email.addTo(to);
 			email.send();

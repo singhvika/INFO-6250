@@ -38,6 +38,7 @@ import com.vikas.eventplanner.pojo.Event;
 import com.vikas.eventplanner.pojo.Invite;
 import com.vikas.eventplanner.pojo.Item;
 import com.vikas.eventplanner.pojo.User;
+import com.vikas.eventplanner.utils.EmailUtil;
 import com.vikas.eventplanner.utils.RedirectionUtil;
 import com.vikas.eventplanner.utils.SessionChecker;
 
@@ -67,6 +68,7 @@ public class DashboardController {
 	public ModelAndView showDashboard(HttpServletRequest request, HttpServletResponse respnose, ModelMap map) {
 		if (!SessionChecker.checkForUserSession(request)) {
 			System.out.println("not logged in redirecting to login:");
+
 			return RedirectionUtil.redirectToLogin(request, respnose);
 
 		} else {
@@ -262,9 +264,10 @@ public class DashboardController {
 			if (event.getActive() != true) {
 				map.addAttribute("error", "event you are trying to modify is inactive");
 				map.addAttribute("redirect", "/dashboard/event.htm?id=" + eventId);
+				return new ModelAndView("eventError", "map", map);
 			}
-			request.setAttribute("newUserForEvent", user);
-
+			request.setAttribute("newUserForEvent", new User());
+			map.addAttribute("newUserForEvent", new User());
 			map.addAttribute("event", event);
 			map.addAttribute("isUserAdmin", isUserAdminOrParticipant);
 			return new ModelAndView("addUser", "map", map);
@@ -277,14 +280,16 @@ public class DashboardController {
 			@ModelAttribute("newUserForEvent") User newUserForEvent, BindingResult bindingResult, Invite invite,
 			RedirectAttributes redirectAttributes, ModelMap map, @RequestParam("eventId") String eventId) {
 		System.out.println("attempting to send invite");
-		if (request.getSession().getAttribute("user") != null) {
+		System.out.println("for email: " + newUserForEvent.getEmail());
 
-			if (bindingResult.hasErrors()) {
-				System.out.println("new user to event bind eror");
-				System.out.println(bindingResult.getAllErrors());
-				System.out.println("UserInviteError");
-				return new ModelAndView("redirect:/dashboard/event.htm?id=" + request.getParameter("eventId"));
-			}
+		if (bindingResult.hasErrors()) {
+			System.out.println("new user to event bind eror");
+			System.out.println(bindingResult.getAllErrors());
+			System.out.println("UserInviteError");
+			return new ModelAndView("addUser", "map", map);
+		}
+
+		if (request.getSession().getAttribute("user") != null) {
 
 			System.out.println("no binding errors");
 			Event event = eventDao.getEventById((String) request.getParameter("eventId"));
@@ -297,22 +302,34 @@ public class DashboardController {
 					invite.setInviteFromUser(loggedInUser);
 					System.out.println("invite for:" + newUserForEvent.getEmail());
 					User inviteForUser = userDao.getUserByUserObjectWithEmail(newUserForEvent);
+					if (inviteForUser != null) {
+						invite.setInviteForEvent(event);
+						invite.setCreatedDate(new Date());
+						invite.setInviteForUser(inviteForUser);
+						invite.setActive(Boolean.TRUE);
+						inviteDao.invalidateStaleEvents(event.getId(), inviteForUser.getEmail());
 
-					invite.setInviteForEvent(event);
-					invite.setCreatedDate(new Date());
-					invite.setInviteForUser(inviteForUser);
-					invite.setActive(Boolean.TRUE);
-					inviteDao.invalidateStaleEvents(event.getId(), inviteForUser.getEmail());
+						String uniqueID = UUID.randomUUID().toString();
+						invite.setUniqueId(uniqueID);
+						inviteDao.saveInvite(invite);
 
-					String uniqueID = UUID.randomUUID().toString();
-					invite.setUniqueId(uniqueID);
-					inviteDao.saveInvite(invite);
-					String inviteURLAccept = "http://localhost:8080/eventplanner/dashboard/user/invite?uid=" + uniqueID;
-					System.out.println("INVITE URL: " + inviteURLAccept);
-					System.out.println("invite sent");
-					map.addAttribute("success", "invite has been sent ");
+						String inviteURLAccept = "http://localhost:8080/eventplanner/dashboard/user/invite.htm?uid="
+								+ uniqueID;
+						System.out.println("INVITE URL: " + inviteURLAccept);
+						String emailBody = "Hello, " + inviteForUser.getFirstName()
+								+ "\n I'd like to invite you to the Event I am Hosting: \n" + event.getEventName()
+								+ "\n" + "Click the Below Link to join \n" + inviteURLAccept;
+						EmailUtil.sendEmail(loggedInUser.getEmail(), inviteForUser.getEmail(), emailBody,
+								"Event invite from " + loggedInUser);
+						System.out.println("invite sent");
+						map.addAttribute("success", "invite has been sent ");
+						map.addAttribute("redirect", "/dashboard/event.htm?id=" + eventId);
+						return new ModelAndView("addUserSuccess", "map", map);
+					}
+					System.out.println("invite could not be sent as user does not exists");
+					map.addAttribute("success", "Make sure the user is on this platform to receive the invite");
 					map.addAttribute("redirect", "/dashboard/event.htm?id=" + eventId);
-					return new ModelAndView("addUserSuccess");
+					return new ModelAndView("addUserSuccess", "map", map);
 
 				} else {
 					return new ModelAndView("redirect:/dashboard/event.htm?id=" + request.getParameter("eventId"));
@@ -364,6 +381,42 @@ public class DashboardController {
 			}
 		}
 		return new ModelAndView("redirect:/dashboard.htm");
+	}
+
+	@RequestMapping(value = "/dashboard/event/item/deleteitem.htm", method = RequestMethod.POST)
+	public ModelAndView deleteItem(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("itemId") String itemId, @RequestParam("eventId") String eventId,
+			ModelMap map) {
+
+		if (SessionChecker.checkForUserSession(request) == true) {
+			User loggedInUser = userDao.getUserByEmail((String) request.getSession().getAttribute("user"));
+			Event event = eventDao.getEventById(eventId);
+			
+				if (event.checkAdmin(loggedInUser) == 1)
+				{
+					if (event.getActive()==true)
+					{
+						itemDao.deleteItem(itemId);
+						return new ModelAndView("redirect:/dashboard/event.htm?id=" + eventId);
+					}
+					map.addAttribute("error", "event is inactive");
+					map.addAttribute("redirect","/dashboard/event.htm?id=" + eventId);
+					return new ModelAndView("eventError","map",map);
+					
+					
+				}
+				map.addAttribute("error","Unauthorised");
+				map.addAttribute("redirect","/dashboard/event.htm?id=" + eventId);
+				return new ModelAndView("eventError","map",map);
+			
+			
+				
+			
+			
+
+		}
+
+		return new ModelAndView("redirect:/login.htm");
 	}
 
 	@RequestMapping(value = "/dashboard/user/invite.htm")
@@ -461,11 +514,13 @@ public class DashboardController {
 					return new ModelAndView("itemError", "map", map);
 				}
 				map.addAttribute("error", "Event is inactive");
+				map.addAttribute("redirect", "/dashboard/event.htm?id=" + eventId);
+				return new ModelAndView("eventError", "map", map);
 
 			}
 			map.addAttribute("error", "unauthorized");
 			map.addAttribute("redirect", "/dashboard.htm");
-			return new ModelAndView();
+			return new ModelAndView("eventError", "map", map);
 		}
 		return RedirectionUtil.redirectToLogin(request, response);
 	}
@@ -502,6 +557,7 @@ public class DashboardController {
 				map.addAttribute("redirect", "/dashboard.htm");
 				return new ModelAndView();
 			} else {
+				System.out.println("EVENT INACTIVE >> CANNOT CLAIM");
 				map.addAttribute("error", "the event you are trying to participate in is inactive");
 				map.addAttribute("redirect", "/dashboard/event/htm?id=" + eventId);
 				return new ModelAndView("eventError", "map", map);

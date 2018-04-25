@@ -11,6 +11,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+
 @Entity(name = "Item")
 @Table(name = "ITEM_TABLE")
 public class Item {

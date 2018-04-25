@@ -35,7 +35,7 @@ ${participatingUser.firstName} | ${participatingUser.email} <br>
 		
 	<form:form action="${contextPath}/dashboard/event/addUser.htm"
 					modelAttribute="newUserForEvent" method="POST">
-			User Email<form:input path="email" name="email" />
+			User Email<form:input path="email" name="email"  required="true" type="email"/> <form:errors path="email"/>
 					<input type="submit" value="Send Invite" />
 					<input type="hidden" name="eventId" value="${map.event.id} " />
 				</form:form>

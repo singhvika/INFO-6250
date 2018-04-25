@@ -5,4 +5,5 @@
 	
 	<!-- Root Context: defines shared resources visible to all other web components -->
 		<bean id="udao" name="udao" class="com.vikas.eventplanner.dao.UserDAO" />
+		<bean id="itemDao" name="itemDao" class="com.vikas.eventplanner.dao.ItemDAO"/>
 </beans>

@@ -30,4 +30,16 @@
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 
+
+	<filter>
+        <filter-name>no-back-filter</filter-name>
+        <filter-class>com.vikas.eventplanner.filters.NoBackFilter</filter-class>
+        
+    </filter>
+	
+	<filter-mapping>
+        <filter-name>no-back-filter</filter-name>
+        <url-pattern>*.htm</url-pattern>
+    </filter-mapping>
+
 </web-app>
