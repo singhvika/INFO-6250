@@ -21,9 +21,11 @@
 
 		<div class="panel panel-primary">
 			<div class="panel-heading">
-				<form class="pull-right" action ="${contextPath }/dashboard/event/downloadPDF" method="POST">
-				<input type="hidden" name="eventId" value="${map.event.id }"/>
-				<input type="submit" value="Summary Report" class="btn btn-sm btn-success"/>
+				<form class="pull-right"
+					action="${contextPath }/dashboard/event/downloadPDF" method="POST">
+					<input type="hidden" name="eventId" value="${map.event.id }" /> <input
+						type="submit" value="Summary Report"
+						class="btn btn-sm btn-success" />
 				</form>
 				<c:choose>
 					<c:when test="${map.event.active}">
@@ -188,12 +190,12 @@
 
 														<c:choose>
 															<c:when test="${map.event.active }">
-																
+
 																<input type="submit" value="DELETE" name="submit"
-																	class="btn btn-sm btn-danger"/>
-																
-																
-																
+																	class="btn btn-sm btn-danger" />
+
+
+
 															</c:when>
 															<c:otherwise>
 																<input type="submit" value="DELETE" name="submit"
@@ -201,7 +203,8 @@
 															</c:otherwise>
 														</c:choose>
 													</form></td>
-													<td><input type="button" value="UnClaimed"  class="btn btn-sm btn-default" disabled="true"></td>
+												<td><input type="button" value="UnClaimed"
+													class="btn btn-sm btn-default" disabled="true"></td>
 
 
 											</c:when>
@@ -252,7 +255,7 @@
 											</c:otherwise>
 										</c:choose>
 
-									
+
 
 									</tr>
 								</c:forEach>

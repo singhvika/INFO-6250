@@ -134,6 +134,19 @@ public class DashboardController {
 
 		}
 
+		
+		if (event.getFromDate().equals(event.getToDate())) {
+			map.put("addError", "Start and End Date cannot be same");
+			System.out.println("SAME DATES");
+			return new ModelAndView("createEvent", "map", map);
+		}
+
+		if (event.getToDate().before(event.getFromDate())) {
+			System.out.println("INVALID DATES");
+			map.put("addError", "End-Date cannot be before Start Date");
+			return new ModelAndView("createEvent", "map", map);
+		}
+
 		System.out.println("Event Object is: " + event);
 		String userEmail = (String) request.getSession().getAttribute("user");
 		System.out.println("userEmail: " + userEmail);
@@ -423,7 +436,7 @@ public class DashboardController {
 		return new ModelAndView("redirect:/login.htm");
 	}
 
-	@RequestMapping(value="/dashboard/user/invite.htm" , method = RequestMethod.GET)
+	@RequestMapping(value = "/dashboard/user/invite.htm", method = RequestMethod.GET)
 	public ModelAndView showInvite(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("uid") String uid, ModelMap map) {
 		if (SessionChecker.checkForUserSession(request) == false) {
@@ -439,9 +452,9 @@ public class DashboardController {
 				map.addAttribute("invite", invite);
 				return new ModelAndView("invite", "map", map);
 			} else {
-				map.addAttribute("error","invalid invite");
-				map.addAttribute("redirect","/dashboard.htm");
-				return new ModelAndView("inviteError","map",map);
+				map.addAttribute("error", "invalid invite");
+				map.addAttribute("redirect", "/dashboard.htm");
+				return new ModelAndView("inviteError", "map", map);
 			}
 		}
 		return new ModelAndView("redirect:/dashboard.htm");
@@ -551,8 +564,7 @@ public class DashboardController {
 				if (event.checkAdminOrParticipant(loggedInUser) != 0) {
 					if (event.checkAdminOrParticipant(loggedInUser) != 0) {
 						Item item = itemDao.getItemById(itemId);
-						if (item.getFullfilledByUser()==null)
-						{
+						if (item.getFullfilledByUser() == null) {
 							System.out.println("ITEM: " + item.getName());
 							item.setFullfilledByUser(loggedInUser);
 							item.setFullFulledQuantity(claimItem.getFullFulledQuantity());
@@ -561,17 +573,16 @@ public class DashboardController {
 							return new ModelAndView("redirect:/dashboard/event.htm?id=" + eventId);
 						}
 						map.addAttribute("error", "item Already Claimed");
-						map.addAttribute("redirect", "/dashboard/event.htm?id="+eventId);
-						return new ModelAndView("eventError","map",map);
-						
-						
+						map.addAttribute("redirect", "/dashboard/event.htm?id=" + eventId);
+						return new ModelAndView("eventError", "map", map);
+
 					} else {
 						return RedirectionUtil.redirectToDashboard(request, response);
 					}
 				}
 				map.addAttribute("error", "unauthorized");
 				map.addAttribute("redirect", "/dashboard.htm");
-				return new ModelAndView("eventError","map",map);
+				return new ModelAndView("eventError", "map", map);
 			} else {
 				System.out.println("EVENT INACTIVE >> CANNOT CLAIM");
 				map.addAttribute("error", "the event you are trying to participate in is inactive");
@@ -653,12 +664,12 @@ public class DashboardController {
 		if (SessionChecker.checkForUserSession(request) == true) {
 			User loggedInUser = userDao.getUserByEmail((String) request.getSession().getAttribute("user"));
 			Event event = eventDao.getEventById(eventId);
-			System.out.println("deleting user: "+userId);
+			System.out.println("deleting user: " + userId);
 			if (event.checkAdminOrParticipant(loggedInUser) == 1) {
 				System.out.println("authorised to perform delete user Action");
 				User removeUser = userDao.getUserById(userId);
 				if (event.removeUserFromParticipants(removeUser) == true) {
-					System.out.println("removed froom event: "+event.getId());
+					System.out.println("removed froom event: " + event.getId());
 					ArrayList<Item> itemList = (ArrayList<Item>) itemDao.getUserItemsForEvent(removeUser, event);
 					for (Item i : itemList) {
 						i.setFullfilledByUser(null);
@@ -667,7 +678,7 @@ public class DashboardController {
 						itemDao.mergeItem(i);
 					}
 					eventDao.mergeEvent(event);
-					
+
 					return new ModelAndView("redirect:/dashboard/event.htm?id=" + eventId);
 				}
 				map.addAttribute("error", "cannot remove user");
@@ -683,43 +694,38 @@ public class DashboardController {
 		return new ModelAndView("redirect:/login.htm");
 	}
 
-	@RequestMapping(value="/dashboard/event/item/removeClaim.htm", method=RequestMethod.POST)
+	@RequestMapping(value = "/dashboard/event/item/removeClaim.htm", method = RequestMethod.POST)
 	public ModelAndView removeIemClaim(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("itemId")String itemId, @RequestParam("eventId") String eventId, ModelMap map)
-	{
-		
-		if (SessionChecker.checkForUserSession(request)==true)
-		{
-			
-			User loggedInUser = userDao.getUserByEmail((String)request.getSession().getAttribute("user"));
+			@RequestParam("itemId") String itemId, @RequestParam("eventId") String eventId, ModelMap map) {
+
+		if (SessionChecker.checkForUserSession(request) == true) {
+
+			User loggedInUser = userDao.getUserByEmail((String) request.getSession().getAttribute("user"));
 			Event event = eventDao.getEventById(eventId);
-			
-			if (event.checkAdminOrParticipant(loggedInUser)!=0)
-			{
-				if (event.getActive()==true)
-				{
+
+			if (event.checkAdminOrParticipant(loggedInUser) != 0) {
+				if (event.getActive() == true) {
 					Item item = itemDao.getItemById(itemId);
-					if (item!=null)
-					{
+					if (item != null) {
 						item.setFullfilledByUser(null);
 						item.setFullFulledQuantity(0);
 						item.setTotalPrice(0.0);
 						itemDao.mergeItem(item);
-						return new ModelAndView("redirect:/dashboard/event.htm?id="+eventId);
+						return new ModelAndView("redirect:/dashboard/event.htm?id=" + eventId);
 					}
 					map.addAttribute("error", "item does not exist");
-					map.addAttribute("redirect", "/dashboard/event.htm?id="+eventId);
-					return new ModelAndView("eventError","map",map);
+					map.addAttribute("redirect", "/dashboard/event.htm?id=" + eventId);
+					return new ModelAndView("eventError", "map", map);
 				}
 				map.addAttribute("error", "event is inactive");
-				map.addAttribute("redirect", "/dashboard/event.htm?id="+eventId);
-				return new ModelAndView("eventError","map",map);
-				
+				map.addAttribute("redirect", "/dashboard/event.htm?id=" + eventId);
+				return new ModelAndView("eventError", "map", map);
+
 			}
 			map.addAttribute("error", "unAuthorised");
 			map.addAttribute("redirect", "/dashboard.htm");
-			return new ModelAndView("eventError","map",map);
+			return new ModelAndView("eventError", "map", map);
 		}
-	return new ModelAndView("redirect:/login.htm");
+		return new ModelAndView("redirect:/login.htm");
 	}
 }
