@@ -177,9 +177,9 @@ public class Event {
 	}
 
 	public int checkAdminOrParticipant(User user) {
-		
-		System.out.println("admin of the event is: "+this.getCreatedByUser().getId());
-		if (this.getCreatedByUser().getId()==user.getId()) {
+
+		System.out.println("admin of the event is: " + this.getCreatedByUser().getId());
+		if (this.getCreatedByUser().getId() == user.getId()) {
 			System.out.println("user is admin of event");
 			return 1;
 		}
@@ -189,7 +189,7 @@ public class Event {
 			System.out.println("size:" + this.getParticipatingUsers().size());
 			System.out.println("COUNTER: " + counter);
 			counter = counter + 1;
-			if (u.getId()==user.getId()) {
+			if (u.getId() == user.getId()) {
 				System.out.println("user is participant");
 				return 2;
 			}
@@ -214,21 +214,38 @@ public class Event {
 		return "Event [eventName=" + eventName + ", fromDate=" + fromDate + ", toDate=" + toDate + ", createdByUser="
 				+ createdByUser + ", id=" + id + "]";
 	}
-	
-	
-	public boolean addItem(Item item)
-	{
+
+	public boolean addItem(Item item) {
 		boolean flag = false;
-		for( Item i : this.getItemList() )
-		{
-			if (i.getName().equalsIgnoreCase(item.getName()))
-			{
+		for (Item i : this.getItemList()) {
+			if (i.getName().equalsIgnoreCase(item.getName())) {
 				flag = true;
 				return false;
 			}
 		}
-		 this.getItemList().add(item);
-		 return true;
+		this.getItemList().add(item);
+		return true;
+	}
+
+	public boolean removeUserFromParticipants(User user) {
+		if (this.getCreatedByUser().getEmail().equalsIgnoreCase(user.getEmail()))
+			return false;
+		User removeUser = null;
+		for (User u : this.getParticipatingUsers())
+		{
+			if (u.getEmail().equalsIgnoreCase(user.getEmail()))
+			{
+				removeUser = u;
+				break;
+			}
+
+		}
+		if (removeUser !=null)
+		{
+			this.getParticipatingUsers().remove(removeUser);
+			return true;
+		}
+		return false;
 	}
 
 }

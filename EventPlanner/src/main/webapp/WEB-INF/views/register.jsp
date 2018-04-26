@@ -7,15 +7,15 @@
 <html>
 <head>
 
-<%@ include file="/resources/static/head.jsp" %>
+<%@ include file="/resources/static/head.jsp"%>
 <title>Register User</title>
 </head>
 <body>
 
-############## ${contextPath}
-<%@ include file="/resources/static/navbar.jsp" %>
+	<%@ include file="/resources/static/navbar.jsp"%>
 	<div class="container">
-		<div class="col-md-6 col-md-offset-3 col-xs-12 col-lg-6 col-lg-offset-3 col-sm-12">
+		<div
+			class="col-md-4 col-md-offset-4 col-xs-12 col-lg-4 col-lg-offset-4 col-sm-12 well well-sm">
 			<form:form action="register.htm" method="POST" commandName="user"
 				modelAttribute="user">
 				<div class="form-group">
@@ -25,30 +25,38 @@
 				</div>
 				<div class="form-group">
 					<label>Password</label>
-					<form:input path="pwd" name="pwd" type="password" class="form-control" required="required"></form:input>
+					<form:input path="pwd" name="pwd" type="password"
+						class="form-control" required="required"></form:input>
 					<form:errors path="pwd"></form:errors>
 				</div>
-				
+
 				<div class="form-group">
 					<label>First Name:</label>
-				<form:input path="firstName" name="firstName" required="required" class="form-control"></form:input>
-				<form:errors path="firstName"></form:errors>
+					<form:input path="firstName" name="firstName" required="required"
+						class="form-control"></form:input>
+					<form:errors path="firstName"></form:errors>
 				</div>
-				
+
 				<div class="form-group">
 					<label>Last Name: </label>
 					<form:input path="lastName" name="lastName" class="form-control"></form:input>
 					<form:errors path="lastName"></form:errors>
 				</div>
-								
-				<input type="submit" name="submit" value="submit" class="btn-success btn"/><form:errors path="pwd" /><br>
+
+				<input type="submit" name="submit" value="submit"
+					class="btn-success btn" />
+				<form:errors path="pwd" />
+				<br>
 			</form:form>
+			<c:if test="${not empty registerError }">
+				<div class="alert alert-danger">${registerError}</div>
+			</c:if>
 		</div>
 	</div>
 
-	
-	
-	Register Status: 	${registerError} 
+
+
+	Register Status: ${registerError}
 
 </body>
 </html>

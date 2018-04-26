@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.vikas.eventplanner.dao.UserDAO;
+import com.vikas.eventplanner.pojo.LoginUser;
 import com.vikas.eventplanner.pojo.User;
 
 public class AuthenticationService {
@@ -21,10 +22,12 @@ public class AuthenticationService {
 
 
 
-	public Boolean authenticate(User incomingUser) {
+	public Boolean authenticate(LoginUser incomingUser) {
+		
+		
 		
 
-		User user = new UserDAO().getUserByUserObjectWithEmail(incomingUser);
+		User user = new UserDAO().getUserByEmail(incomingUser.getEmail());
 		System.out.println("FOUND USER in authenticate:" +user);
 		if (user == null) {
 			return false;

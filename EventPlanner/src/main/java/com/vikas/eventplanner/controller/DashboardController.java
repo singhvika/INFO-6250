@@ -21,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -64,8 +65,10 @@ public class DashboardController {
 		webDataBinder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
 	}
 
-	@RequestMapping(value = "/dashboard", method = RequestMethod.GET)
+	@RequestMapping(value = "/dashboard.htm", method = RequestMethod.GET)
 	public ModelAndView showDashboard(HttpServletRequest request, HttpServletResponse respnose, ModelMap map) {
+
+		System.out.println("moving to user dashboard");
 		if (!SessionChecker.checkForUserSession(request)) {
 			System.out.println("not logged in redirecting to login:");
 
@@ -348,7 +351,7 @@ public class DashboardController {
 
 	@RequestMapping(value = "/dashboard/event/addItem.htm", method = RequestMethod.POST)
 	public ModelAndView addItem(HttpServletRequest request, HttpServletResponse response,
-			@ModelAttribute("eventItem") Item eventItem, BindingResult bindingResult,
+			@ModelAttribute("eventItem") @Validated Item eventItem, BindingResult bindingResult,
 			@RequestParam("eventId") String eventId, ModelMap map) {
 		System.out.println("adding Item: ");
 		if (SessionChecker.checkForUserSession(request) == true) {
@@ -359,7 +362,9 @@ public class DashboardController {
 					System.out.println("event is active... hence can add Item");
 					if (bindingResult.hasErrors()) {
 						System.out.println("error binding item object");
-						return new ModelAndView("eventDetails");
+						map.addAttribute("error", "requested quantity cannot be 0");
+						map.addAttribute("redirect", "/dashboard/event.htm?id=" + eventId);
+						return new ModelAndView("eventError", "map", map);
 					}
 					if (event.addItem(eventItem) == true) {
 						System.out.println("item does not exist in event hence addin");
@@ -377,6 +382,7 @@ public class DashboardController {
 				} else {
 					map.addAttribute("error", "the event you are trying to modify is not active, Activate it first");
 					map.addAttribute("redirect", "/dashboard/event.htm?id=" + eventId);
+					return new ModelAndView("eventError", "map", map);
 				}
 			}
 		}
@@ -385,34 +391,25 @@ public class DashboardController {
 
 	@RequestMapping(value = "/dashboard/event/item/deleteitem.htm", method = RequestMethod.POST)
 	public ModelAndView deleteItem(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("itemId") String itemId, @RequestParam("eventId") String eventId,
-			ModelMap map) {
+			@RequestParam("itemId") String itemId, @RequestParam("eventId") String eventId, ModelMap map) {
 
 		if (SessionChecker.checkForUserSession(request) == true) {
 			User loggedInUser = userDao.getUserByEmail((String) request.getSession().getAttribute("user"));
 			Event event = eventDao.getEventById(eventId);
-			
-				if (event.checkAdmin(loggedInUser) == 1)
-				{
-					if (event.getActive()==true)
-					{
-						itemDao.deleteItem(itemId);
-						return new ModelAndView("redirect:/dashboard/event.htm?id=" + eventId);
-					}
-					map.addAttribute("error", "event is inactive");
-					map.addAttribute("redirect","/dashboard/event.htm?id=" + eventId);
-					return new ModelAndView("eventError","map",map);
-					
-					
+
+			if (event.checkAdmin(loggedInUser) == 1) {
+				if (event.getActive() == true) {
+					itemDao.deleteItem(itemId);
+					return new ModelAndView("redirect:/dashboard/event.htm?id=" + eventId);
 				}
-				map.addAttribute("error","Unauthorised");
-				map.addAttribute("redirect","/dashboard/event.htm?id=" + eventId);
-				return new ModelAndView("eventError","map",map);
-			
-			
-				
-			
-			
+				map.addAttribute("error", "event is inactive");
+				map.addAttribute("redirect", "/dashboard/event.htm?id=" + eventId);
+				return new ModelAndView("eventError", "map", map);
+
+			}
+			map.addAttribute("error", "Unauthorised");
+			map.addAttribute("redirect", "/dashboard/event.htm?id=" + eventId);
+			return new ModelAndView("eventError", "map", map);
 
 		}
 
@@ -629,5 +626,38 @@ public class DashboardController {
 		}
 
 		return RedirectionUtil.redirectToLogin(request, response);
+	}
+
+	@RequestMapping(value = "/dashboard/event/user/delete.htm", method = RequestMethod.POST)
+	public ModelAndView deleteUserFromEvent(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("id") String userId, @RequestParam("eventId") String eventId, ModelMap map) {
+		if (SessionChecker.checkForUserSession(request) == true) {
+			User loggedInUser = userDao.getUserByEmail((String) request.getSession().getAttribute("user"));
+			Event event = eventDao.getEventById(eventId);
+			if (event.checkAdminOrParticipant(loggedInUser)==1)
+			{
+				User removeUser = userDao.getUserById(userId);
+				if (event.removeUserFromParticipants(removeUser) == true) {
+					ArrayList<Item> itemList = (ArrayList<Item>) itemDao.getUserItemsForEvent(removeUser, event);
+					for (Item i : itemList) {
+						i.setFullfilledByUser(null);
+						i.setTotalPrice(0.0);
+						i.setFullFulledQuantity(0);
+						eventDao.mergeEvent(event);
+						itemDao.mergeItem(i);
+					}
+					return new ModelAndView("redirect:/dashboard/event.htm?id="+eventId);
+				}
+				map.addAttribute("error","user already not part of event or already deleted");
+				map.addAttribute("redirect","/dashboard/event.htm?id="+eventId);
+				return new ModelAndView("eventError","map",map);
+				
+			}
+			map.addAttribute("error","Un-Authorised");
+			map.addAttribute("redirect","/dashboard/event.htm?id="+eventId);
+			return new ModelAndView("eventError","map",map);
+		}
+
+		return new ModelAndView("redirect:/login.htm");
 	}
 }

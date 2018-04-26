@@ -10,13 +10,18 @@
 </head>
 <body>
 <%@ include file="/resources/static/navbar.jsp" %>
+<div
+		class="col-lg-10 col-lg-offset-1 col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1 col-md-10 col-md-offset-1 well well-sm" >
 
-You have been invited to Join, ${map.invite.inviteForEvent.eventName}
-<br>By: ${map.invite.inviteFromUser.lastName }, ${map.invite.inviteFromUser.firstName } | ${map.invite.inviteFromUser.email } 
+You have been invited to Join, <strong>${map.invite.inviteForEvent.eventName}<strong>
+<br>By:<strong> ${map.invite.inviteFromUser.lastName }, ${map.invite.inviteFromUser.firstName } <strong> | ${map.invite.inviteFromUser.email } 
 <br>
 Click the below link to join
 <br>
-<a href="http://localhost:8080/eventplanner/dashboard/user/acceptInvite.htm?uid=${map.invite.uniqueId }&answer=yes">Accept Invitation</a>
+<form action="http://localhost:8080/eventplanner/dashboard/user/acceptInvite.htm?uid=${map.invite.uniqueId }&answer=yes" >
+<input type="submit" value="Accept" class="btn btn-success"/>
+</form>
 
+</div>
 </body>
 </html>

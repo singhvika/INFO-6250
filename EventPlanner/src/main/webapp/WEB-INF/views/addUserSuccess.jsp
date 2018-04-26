@@ -12,7 +12,8 @@
 <%@ include file="/resources/static/navbar.jsp" %>
 
 <br>
-${map.success }
+<div class="alert alert-success">${map.success }</div>
+
 <br>
 Click <a href="${contextPath}${map.redirect}">here</a> to go back to event.
 

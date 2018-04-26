@@ -28,6 +28,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import com.vikas.eventplanner.dao.*;
+import com.vikas.eventplanner.pojo.LoginUser;
 import com.vikas.eventplanner.pojo.User;
 import com.vikas.eventplanner.services.AuthenticationService;
 import com.vikas.eventplanner.utils.SessionChecker;
@@ -36,7 +37,7 @@ import com.vikas.eventplanner.utils.SessionChecker;
 public class AuthenticationController {
 
 	@RequestMapping(value = "/login.htm", method = RequestMethod.GET)
-	public ModelAndView showLoginPage(HttpServletRequest req, HttpServletResponse res, User user) {
+	public ModelAndView showLoginPage(HttpServletRequest req, HttpServletResponse res, LoginUser user) {
 		HttpSession session = req.getSession(false);
 		if (SessionChecker.checkForUserSession(req) == false) {
 			ModelAndView mv = new ModelAndView("login");
@@ -49,12 +50,18 @@ public class AuthenticationController {
 
 	@RequestMapping(value = "/login.htm", method = RequestMethod.POST)
 	public ModelAndView performLogin(HttpServletRequest req, HttpServletResponse res,
-			@ModelAttribute("user") @Validated User user, BindingResult bindingResult,
+			@ModelAttribute("user") @Validated LoginUser user, BindingResult bindingResult,
 			AuthenticationService authenticationService, UserDAO userDAO) {
+
+		if (bindingResult.hasErrors()) {
+			System.out.println("login binding error");
+			return new ModelAndView("login");
+		}
 
 		System.out.println("now attempting login: ");
 		if (SessionChecker.checkForUserSession(req) == false) {
 			System.out.println("beginning authentication:");
+
 			if (authenticationService.authenticate(user) == true) {
 				System.out.println("authentication successfull");
 				SessionChecker.getSessionForUser(req, user.getEmail());

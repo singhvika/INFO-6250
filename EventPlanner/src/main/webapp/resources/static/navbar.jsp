@@ -1,71 +1,47 @@
-<!--<nav class="navbar navbar-expand-sm bg-primary navbar-dark">
-	<ul class="navbar-nav mr-auto">
-		
-		<li class="nav-item"><a class="navbar-brand" href="#"></a></li>
-	</ul>
-	<ul class="navbar-nav ml-auto">
-
+<nav class="navbar navbar-inverse">
+	<div class="container-fluid">
+		<div class="navbar-header">
+		<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span> 
+      </button>
+			<a class="navbar-brand" href="#">Event Planner</a>
+		</div>
+		<div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="${contextPath }">Home</a></li>
+      </ul>
+      		<ul class="nav navbar-nav navbar-right">
 		<c:choose>
 			<c:when test="${sessionScope.user == null}">
-				<li class="nav-item"><a class="nav-link"
-					href="${contextPath}/register.htm">Signup</a></li>
-				</li>
-				<li class="nav-item"><a class="nav-link"
-					href="${contextPath}/login.htm">Login</a></li>
-				</li>
+			
+				<li><a href="${contextPath}/register.htm"><span
+						class="glyphicon glyphicon-user"></span> Sign Up</a></li>
+				<li><a href="${contextPath}/login.htm"><span
+						class="glyphicon glyphicon-log-in"></span> Login</a></li>
+			
+
 			</c:when>
+			
 			<c:otherwise>
-				<li class="nav-item">Hi, ${sessionScope.user}</li>
-				<li class="nav-item"><a class="nav-link"
-					href="${contextPath }/dashboard.htm">Dashboard</a></li>
-				<li class="nav-item"><a class="nav-link"
-					href="${contextPath}/logout.htm"></li>Logout</a>
+			
+			<li><a href="${contextPath}/dashboard.htm"><span
+						class="glyphicon glyphicon-user"></span> Dashboard</a></li>
+				<li><a href="${contextPath}/logout.htm"><span
+						class="glyphicon glyphicon-log-in"></span> Signout</a></li>
+			
 			</c:otherwise>
+			
 		</c:choose>
-</nav>-->
+		</ul>
+    </div>
+		
+		
+
+	</div>
+</nav>
 
 
- <!-- Fixed navbar -->
-    <nav class="navbar navbar-default navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">Event
-				Planner</a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-           <c:choose>
-			<c:when test="${sessionScope.user == null}">
-				<li><a class="nav-link"
-					href="${contextPath}/register.htm">Signup</a></li>
-				</li>
-				<li><a class="nav-link"
-					href="${contextPath}/login.htm">Login</a></li>
-				</li>
-			</c:when>
-			<c:otherwise>
-				<li>Hi, ${sessionScope.user}</li>
-				<li><a class="nav-link"
-					href="${contextPath }/dashboard.htm">Dashboard</a></li>
-				<li><a class="nav-link"
-					href="${contextPath}/logout.htm"></li>Logout</a>
-			</c:otherwise>
-		</c:choose>
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
-    
-    
-    <br><br><br><br>
-
+<br>
 

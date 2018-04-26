@@ -12,6 +12,13 @@
 <%@ include file="/resources/static/navbar.jsp" %>
 
 <br>
-INVITE ERROR
+<br>
+	<div class="alert alert-danger">
+
+		${map.itemError} <br>
+	</div>
+	Click
+	<a href="${contextPath}/${map.redirect}"><strong>here</strong></a> to
+	go back
 </body>
 </html>
