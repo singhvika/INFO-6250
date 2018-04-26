@@ -306,6 +306,13 @@ public class DashboardController {
 					System.out.println("invite for:" + newUserForEvent.getEmail());
 					User inviteForUser = userDao.getUserByUserObjectWithEmail(newUserForEvent);
 					if (inviteForUser != null) {
+						System.out.println("checking for user in event");
+						if (event.checkAdminOrParticipant(inviteForUser) != 0) {
+
+							map.addAttribute("error", "user already in event");
+							map.addAttribute("redirect", "/dashboard/event.htm?id=" + eventId);
+							return new ModelAndView("eventError", "map", map);
+						}
 						invite.setInviteForEvent(event);
 						invite.setCreatedDate(new Date());
 						invite.setInviteForUser(inviteForUser);
@@ -416,7 +423,7 @@ public class DashboardController {
 		return new ModelAndView("redirect:/login.htm");
 	}
 
-	@RequestMapping(value = "/dashboard/user/invite.htm")
+	@RequestMapping(value="/dashboard/user/invite.htm" , method = RequestMethod.GET)
 	public ModelAndView showInvite(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("uid") String uid, ModelMap map) {
 		if (SessionChecker.checkForUserSession(request) == false) {
@@ -432,6 +439,8 @@ public class DashboardController {
 				map.addAttribute("invite", invite);
 				return new ModelAndView("invite", "map", map);
 			} else {
+				map.addAttribute("error","invalid invite");
+				map.addAttribute("redirect","/dashboard.htm");
 				return new ModelAndView("inviteError");
 			}
 		}
@@ -479,7 +488,9 @@ public class DashboardController {
 					}
 				} else {
 					System.out.println("invalid invite");
-					return new ModelAndView("inviteError");
+					map.addAttribute("error", "Invalid invite");
+					map.addAttribute("redirect", "/dashboard.htm");
+					return new ModelAndView("eventError", "map", map);
 				}
 
 			}
@@ -634,30 +645,73 @@ public class DashboardController {
 		if (SessionChecker.checkForUserSession(request) == true) {
 			User loggedInUser = userDao.getUserByEmail((String) request.getSession().getAttribute("user"));
 			Event event = eventDao.getEventById(eventId);
-			if (event.checkAdminOrParticipant(loggedInUser)==1)
-			{
+			System.out.println("deleting user: "+userId);
+			if (event.checkAdminOrParticipant(loggedInUser) == 1) {
+				System.out.println("authorised to perform delete user Action");
 				User removeUser = userDao.getUserById(userId);
 				if (event.removeUserFromParticipants(removeUser) == true) {
+					System.out.println("removed froom event: "+event.getId());
 					ArrayList<Item> itemList = (ArrayList<Item>) itemDao.getUserItemsForEvent(removeUser, event);
 					for (Item i : itemList) {
 						i.setFullfilledByUser(null);
 						i.setTotalPrice(0.0);
 						i.setFullFulledQuantity(0);
-						eventDao.mergeEvent(event);
 						itemDao.mergeItem(i);
 					}
-					return new ModelAndView("redirect:/dashboard/event.htm?id="+eventId);
+					eventDao.mergeEvent(event);
+					
+					return new ModelAndView("redirect:/dashboard/event.htm?id=" + eventId);
 				}
-				map.addAttribute("error","user already not part of event or already deleted");
-				map.addAttribute("redirect","/dashboard/event.htm?id="+eventId);
-				return new ModelAndView("eventError","map",map);
-				
+				map.addAttribute("error", "cannot remove user");
+				map.addAttribute("redirect", "/dashboard/event.htm?id=" + eventId);
+				return new ModelAndView("eventError", "map", map);
+
 			}
-			map.addAttribute("error","Un-Authorised");
-			map.addAttribute("redirect","/dashboard/event.htm?id="+eventId);
-			return new ModelAndView("eventError","map",map);
+			map.addAttribute("error", "Un-Authorised");
+			map.addAttribute("redirect", "/dashboard/event.htm?id=" + eventId);
+			return new ModelAndView("eventError", "map", map);
 		}
 
 		return new ModelAndView("redirect:/login.htm");
+	}
+
+	@RequestMapping(value="/dashboard/event/item/removeClaim.htm", method=RequestMethod.POST)
+	public ModelAndView removeIemClaim(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("itemId")String itemId, @RequestParam("eventId") String eventId, ModelMap map)
+	{
+		
+		if (SessionChecker.checkForUserSession(request)==true)
+		{
+			
+			User loggedInUser = userDao.getUserByEmail((String)request.getSession().getAttribute("user"));
+			Event event = eventDao.getEventById(eventId);
+			
+			if (event.checkAdminOrParticipant(loggedInUser)!=0)
+			{
+				if (event.getActive()==true)
+				{
+					Item item = itemDao.getItemById(itemId);
+					if (item!=null)
+					{
+						item.setFullfilledByUser(null);
+						item.setFullFulledQuantity(0);
+						item.setTotalPrice(0.0);
+						itemDao.mergeItem(item);
+						return new ModelAndView("redirect:/dashboard/event.htm?id="+eventId);
+					}
+					map.addAttribute("error", "item does not exist");
+					map.addAttribute("redirect", "/dashboard/event.htm?id="+eventId);
+					return new ModelAndView("eventError","map",map);
+				}
+				map.addAttribute("error", "event is inactive");
+				map.addAttribute("redirect", "/dashboard/event.htm?id="+eventId);
+				return new ModelAndView("eventError","map",map);
+				
+			}
+			map.addAttribute("error", "unAuthorised");
+			map.addAttribute("redirect", "/dashboard.htm");
+			return new ModelAndView("eventError","map",map);
+		}
+	return new ModelAndView("redirect:/login.htm");
 	}
 }

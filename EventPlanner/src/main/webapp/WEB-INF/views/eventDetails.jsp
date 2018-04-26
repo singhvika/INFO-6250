@@ -21,6 +21,10 @@
 
 		<div class="panel panel-primary">
 			<div class="panel-heading">
+				<form class="pull-right" action ="${contextPath }/dashboard/event/downloadPDF" method="GET">
+				<input type="hidden" name="eventId" value="${map.event.id }"/>
+				<input type="submit" value="Summary Report" class="btn btn-sm btn-success"/>
+				</form>
 				<c:choose>
 					<c:when test="${map.event.active}">
 						<c:if test="${ isAdmin}">
@@ -108,11 +112,12 @@
 											<c:choose>
 												<c:when test="${map.event.active }">
 													<td><form
-															action="${contextPath }/dashboard/event/user/delete.htm?id=${user.id}"
+															action="${contextPath }/dashboard/event/user/delete.htm"
 															method="POST">
-															<input type="hidden" name="eventId"
-																value="${map.event.id }" /> <input type="submit"
-																value="Delete" class="btn btn-sm btn-danger" />
+															<input type="hidden" name="id" value="${user.id }" /> <input
+																type="hidden" name="eventId" value="${map.event.id }" />
+															<input type="submit" value="Delete"
+																class="btn btn-sm btn-danger" />
 														</form></td>
 												</c:when>
 												<c:otherwise>
@@ -155,6 +160,7 @@
 									<th>Fullfilled Quantitty</th>
 									<th>Total Price</th>
 									<th>Delete Action</th>
+									<th>Remove Claim</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -191,6 +197,7 @@
 															</c:otherwise>
 														</c:choose>
 													</form></td>
+													<td><input type="button" value="UnClaimed"  class="btn btn-sm btn-default" disabled="true"></td>
 
 
 											</c:when>
@@ -215,14 +222,33 @@
 															</c:otherwise>
 														</c:choose>
 													</form></td>
+												<td>
+													<form
+														action="${contextPath }/dashboard/event/item/removeClaim.htm"
+														method="POST">
+														<input type="hidden" name="itemId" value="${item.id }" />
+														<input type="hidden" name="eventId"
+															value="${map.event.id }" />
+														<c:choose>
+															<c:when test="${map.event.active }">
+
+																<input type="submit" value="Remove Claim" name="submit"
+																	class="btn btn-sm btn-danger" />
+															</c:when>
+															<c:otherwise>
+																<input type="submit" value="Remove Claim" name="submit"
+																	class="btn btn-sm btn-danger" disabled="disabled" />
+															</c:otherwise>
+														</c:choose>
+													</form>
+												</td>
+
 												</form>
 												</td>
 											</c:otherwise>
 										</c:choose>
 
-										<c:if test="${empty item.fullfilledByUser}">
-
-										</c:if>
+									
 
 									</tr>
 								</c:forEach>

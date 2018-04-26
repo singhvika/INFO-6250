@@ -25,7 +25,7 @@
 			value="${eventItem.requestedQuantity }" />
 		<form:errors path="requestedQuantity" />
 		<br> FullFill Quantity	<form:input path="fullFulledQuantity"
-			name="fullFulledQuantity" required="required" />
+			name="fullFulledQuantity" required="required" disabled = "true" value="${eventItem.requestedQuantity }" />
 		<br>Total Price 		<form:input path="totalPrice" name="totalPrice" required="required"/>
 		<br>
 		<input type="hidden" value="${map.event.id}" name="eventId" />

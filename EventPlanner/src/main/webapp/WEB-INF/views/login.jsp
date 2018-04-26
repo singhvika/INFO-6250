@@ -14,28 +14,28 @@
 
 	<div class="container">
 		<div
-			class="col-md-4 col-md-offset-4 col-xs-12 col-lg-4 col-lg-offset-4 col-sm-12 well well-sm" >
+			class="col-md-4 col-md-offset-4 col-xs-12 col-lg-4 col-lg-offset-4 col-sm-12 well well-sm">
 
 
 			<form:form action="login.htm" method="POST" commandName="user"
 				modelAttribute="user">
 				<div class="form-group">
 					<label for="email">Email address:</label>
-					
-					<form:input path="email" name="email" class="form-control"/>
-					<strong>
-					<form:errors path="email" />
+
+					<form:input path="email" name="email" class="form-control" />
+					<strong> <form:errors path="email" />
 					</strong>
 				</div>
 				<div class="form-group">
-				<label for="pwd">Password</label>
-				<form:input path="pwd" name="pwd" type="password" class="form-control"/>
-				<strong>
-				<form:errors path="pwd" />
-				</strong>
+					<label for="pwd">Password</label>
+					<form:input path="pwd" name="pwd" type="password"
+						class="form-control" />
+					<strong> <form:errors path="pwd" />
+					</strong>
 				</div>
-				<input type="submit" name="submit" value="Login" class="btn btn-success"/>
-				
+				<input type="submit" name="submit" value="Login"
+					class="btn btn-success" />
+
 				<br>
 			</form:form>
 		</div>
