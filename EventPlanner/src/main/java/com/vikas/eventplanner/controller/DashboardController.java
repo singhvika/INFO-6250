@@ -441,7 +441,7 @@ public class DashboardController {
 			} else {
 				map.addAttribute("error","invalid invite");
 				map.addAttribute("redirect","/dashboard.htm");
-				return new ModelAndView("inviteError");
+				return new ModelAndView("inviteError","map",map);
 			}
 		}
 		return new ModelAndView("redirect:/dashboard.htm");
@@ -551,19 +551,27 @@ public class DashboardController {
 				if (event.checkAdminOrParticipant(loggedInUser) != 0) {
 					if (event.checkAdminOrParticipant(loggedInUser) != 0) {
 						Item item = itemDao.getItemById(itemId);
-						System.out.println("ITEM: " + item.getName());
-						item.setFullfilledByUser(loggedInUser);
-						item.setFullFulledQuantity(claimItem.getFullFulledQuantity());
-						item.setTotalPrice(claimItem.getTotalPrice());
-						itemDao.mergeItem(item);
-						return new ModelAndView("redirect:/dashboard/event.htm?id=" + eventId);
+						if (item.getFullfilledByUser()==null)
+						{
+							System.out.println("ITEM: " + item.getName());
+							item.setFullfilledByUser(loggedInUser);
+							item.setFullFulledQuantity(claimItem.getFullFulledQuantity());
+							item.setTotalPrice(claimItem.getTotalPrice());
+							itemDao.mergeItem(item);
+							return new ModelAndView("redirect:/dashboard/event.htm?id=" + eventId);
+						}
+						map.addAttribute("error", "item Already Claimed");
+						map.addAttribute("redirect", "/dashboard/event.htm?id="+eventId);
+						return new ModelAndView("eventError","map",map);
+						
+						
 					} else {
 						return RedirectionUtil.redirectToDashboard(request, response);
 					}
 				}
 				map.addAttribute("error", "unauthorized");
 				map.addAttribute("redirect", "/dashboard.htm");
-				return new ModelAndView();
+				return new ModelAndView("eventError","map",map);
 			} else {
 				System.out.println("EVENT INACTIVE >> CANNOT CLAIM");
 				map.addAttribute("error", "the event you are trying to participate in is inactive");

@@ -34,33 +34,32 @@ public class PDFController {
 
 	@Autowired
 	EventDAO eventDao;
-	
+
 	@Autowired
 	ItemDAO itemDao;
 
-	@RequestMapping(value = "/dashboard/event/downloadPDF", method = RequestMethod.GET)
+	@RequestMapping(value = "/dashboard/event/downloadPDF", method = RequestMethod.POST)
 	public ModelAndView downloadPDF(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("eventId") String eventId, ModelMap map) {
-		
-		
+
 		// create some sample data
 		if (SessionChecker.checkForUserSession(request)) {
 			User loggedInUser = udao.getUserByEmail((String) request.getSession().getAttribute("user"));
 			Event event = eventDao.getEventById(eventId);
-			if (event.checkAdminOrParticipant(loggedInUser)!= 0) {
+			if (event.checkAdminOrParticipant(loggedInUser) != 0) {
 				map.put("event", event);
 				map.put("user", loggedInUser);
-				map.addAttribute("userDao",udao);
-				map.addAttribute("itemDao",itemDao);
-				return new ModelAndView("pdfView","map",map);
-				
+				map.addAttribute("userDao", udao);
+				map.addAttribute("itemDao", itemDao);
+				return new ModelAndView("pdfView", "map", map);
+
 			}
-			map.addAttribute("error","Unauthorized");
-			map.addAttribute("redirec","/dashboard.htm");
-			return new ModelAndView("eventError","map",map);
+			map.addAttribute("error", "Unauthorized");
+			map.addAttribute("redirec", "/dashboard.htm");
+			return new ModelAndView("eventError", "map", map);
 		}
 		return RedirectionUtil.redirectToLogin(request, response);
-		
+
 	}
 
 	@RequestMapping(value = "/dashboard/event/downloadPDF")
@@ -69,15 +68,15 @@ public class PDFController {
 		if (SessionChecker.checkForUserSession(request)) {
 			User loggedInUser = udao.getUserByEmail((String) request.getSession().getAttribute("user"));
 			Event event = eventDao.getEventById(eventId);
-			if (event.checkAdminOrParticipant(loggedInUser)!= 0) {
+			if (event.checkAdminOrParticipant(loggedInUser) != 0) {
 				map.put("event", event);
 				map.put("user", loggedInUser);
-				return new ModelAndView("pdfView","map",map);
-				
+				return new ModelAndView("pdfView", "map", map);
+
 			}
-			map.addAttribute("error","Unauthorized");
-			map.addAttribute("redirec","/dashboard.htm");
-			return new ModelAndView("eventError","map",map);
+			map.addAttribute("error", "Unauthorized");
+			map.addAttribute("redirec", "/dashboard.htm");
+			return new ModelAndView("eventError", "map", map);
 		}
 		return RedirectionUtil.redirectToLogin(request, response);
 	}

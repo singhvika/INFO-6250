@@ -15,13 +15,10 @@
 	<%@ include file="/resources/static/navbar.jsp" %>
 	<br>
 
-	YOUR EVENT WAS ADDED:
-	<br>
-	Event ID: ${map.eventId} 
-	<br>
-	Event Name: ${map.eventName}
-	<br>
-	<a href="${contextPath}/dashboard.htm">Click here to go back to Dashboard</a>
+	<div class="alert alert-success" >
+	<strong>Event Added Successfully: ${map.eventName }</strong>
+	</div>
+	Click<a href="${contextPath}/dashboard.htm"> here </a>to go back to Dashboard
 
 </body>
 </html>

@@ -21,7 +21,7 @@
 
 		<div class="panel panel-primary">
 			<div class="panel-heading">
-				<form class="pull-right" action ="${contextPath }/dashboard/event/downloadPDF" method="GET">
+				<form class="pull-right" action ="${contextPath }/dashboard/event/downloadPDF" method="POST">
 				<input type="hidden" name="eventId" value="${map.event.id }"/>
 				<input type="submit" value="Summary Report" class="btn btn-sm btn-success"/>
 				</form>
@@ -188,8 +188,12 @@
 
 														<c:choose>
 															<c:when test="${map.event.active }">
+																
 																<input type="submit" value="DELETE" name="submit"
-																	class="btn btn-sm btn-danger" />
+																	class="btn btn-sm btn-danger"/>
+																
+																
+																
 															</c:when>
 															<c:otherwise>
 																<input type="submit" value="DELETE" name="submit"
@@ -214,11 +218,11 @@
 														<c:choose>
 															<c:when test="${map.event.active }">
 																<input type="submit" value="DELETE" name="submit"
-																	class="btn btn-sm btn-danger" />
+																	class="btn btn-sm btn-danger" disabled="true" />
 															</c:when>
 															<c:otherwise>
 																<input type="submit" value="DELETE" name="submit"
-																	class="btn btn-sm btn-danger" disabled="disabled" />
+																	class="btn btn-sm btn-danger" disabled="true" />
 															</c:otherwise>
 														</c:choose>
 													</form></td>
